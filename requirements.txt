@@ -1,0 +1,7 @@
+# Add only what you really use. Pin versions once the team agrees.
+pytest
+matplotlib
+pandas
+# GUI: E decides in week 1, keep one and delete the other
+# pygame
+# flask
