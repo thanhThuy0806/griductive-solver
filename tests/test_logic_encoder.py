@@ -6,6 +6,8 @@ from griductive.core.types import Clue, ClueError
 from griductive.logic.cnf_encoder import encode_clue
 from griductive.logic.variable_map import VarMap
 
+from griductive.core.regions import resolve_region
+from griductive.core.types import Region
 
 def clue(d):
     return Clue.from_dict(d)
@@ -46,3 +48,47 @@ def test_binary_matches_truth_table(ctype, truth):
 def test_invalid_clue_is_rejected_before_encoding():
     with pytest.raises(ClueError):
         encode_clue(clue({"id": "c", "type": "SAME", "a": "A1", "b": "A1"}), VarMap(3))
+
+def counting(ctype, k, region):
+    return clue({"id": "c", "type": ctype, "k": k, "region": region})
+
+
+ROW1 = {"kind": "ROW", "index": 1}   # A1, B1, C1 -> vars 1, 2, 3
+
+
+def test_exactly_2_on_row1_gives_the_four_clauses():
+    cnf = encode_clue(counting("EXACTLY", 2, ROW1), VarMap(3))
+    assert cnf == [[-1, -2, -3], [1, 2], [1, 3], [2, 3]]
+
+
+def test_boundary_values():
+    vm = VarMap(3)
+    assert encode_clue(counting("AT_MOST", 0, ROW1), vm) == [[-1], [-2], [-3]]
+    assert encode_clue(counting("AT_LEAST", 3, ROW1), vm) == [[1], [2], [3]]
+    assert encode_clue(counting("AT_MOST", 3, ROW1), vm) == []
+    assert encode_clue(counting("AT_LEAST", 0, ROW1), vm) == []
+
+
+@pytest.mark.parametrize("ctype", ["EXACTLY", "AT_LEAST", "AT_MOST"])
+@pytest.mark.parametrize("region", [
+    ROW1,
+    {"kind": "COL", "index": "B"},
+    {"kind": "NEIGHBORS", "of": "A1"},       # corner: 3 cells
+    {"kind": "NEIGHBORS", "of": "B2"},       # centre: 8 cells
+    {"kind": "CELLS", "cells": ["A1", "C2", "B3", "C3"]},
+])
+def test_counting_matches_direct_count(ctype, region):
+    """For every k and every assignment, CNF is satisfied iff the direct count says so."""
+    vm = VarMap(3)
+    cells = resolve_region(Region.from_dict(region), 3)
+    vs = [vm.var(c) for c in cells]
+    rules = {
+        "EXACTLY": lambda count, k: count == k,
+        "AT_LEAST": lambda count, k: count >= k,
+        "AT_MOST": lambda count, k: count <= k,
+    }
+    for k in range(len(cells) + 1):
+        cnf = encode_clue(counting(ctype, k, region), vm)
+        for bits in product([False, True], repeat=len(vs)):
+            model = dict(zip(vs, bits))
+            assert satisfied(cnf, model) == rules[ctype](sum(bits), k)
