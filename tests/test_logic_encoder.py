@@ -8,6 +8,7 @@ from griductive.logic.variable_map import VarMap
 
 from griductive.core.regions import resolve_region
 from griductive.core.types import Region
+from griductive.logic.evaluator import evaluate
 
 def clue(d):
     return Clue.from_dict(d)
@@ -92,3 +93,56 @@ def test_counting_matches_direct_count(ctype, region):
         for bits in product([False, True], repeat=len(vs)):
             model = dict(zip(vs, bits))
             assert satisfied(cnf, model) == rules[ctype](sum(bits), k)
+
+# ---- Task 23: evaluator vs CNF on every complete assignment ----
+
+REGIONS = [
+    ("row1", ROW1), ("row3", {"kind": "ROW", "index": 3}),
+    ("colA", {"kind": "COL", "index": "A"}), ("colC", {"kind": "COL", "index": "C"}),
+    ("nbA1", {"kind": "NEIGHBORS", "of": "A1"}),    # corner: 3 cells
+    ("nbB1", {"kind": "NEIGHBORS", "of": "B1"}),    # edge: 5 cells
+    ("nbB2", {"kind": "NEIGHBORS", "of": "B2"}),    # centre: 8 cells
+    ("nbC3", {"kind": "NEIGHBORS", "of": "C3"}),
+    ("cells4", {"kind": "CELLS", "cells": ["A1", "C2", "B3", "C3"]}),
+]
+
+
+def all_core_clues(n=3):
+    """Build many clues of the six core types, including every k from 0 to |R|."""
+    out = []
+    for cell in ("A1", "B2", "C3"):
+        for status in ("CRIMINAL", "INNOCENT"):
+            out.append({"id": f"FACT_{cell}_{status}", "type": "FACT",
+                        "cell": cell, "status": status})
+    for ctype in ("SAME", "DIFFERENT"):
+        for a, b in (("A1", "B2"), ("A1", "C3"), ("B1", "B3")):
+            out.append({"id": f"{ctype}_{a}_{b}", "type": ctype, "a": a, "b": b})
+    for ctype in ("EXACTLY", "AT_LEAST", "AT_MOST"):
+        for name, region in REGIONS:
+            size = len(resolve_region(Region.from_dict(region), n))
+            for k in range(size + 1):
+                out.append({"id": f"{ctype}_{name}_k{k}", "type": ctype,
+                            "k": k, "region": region})
+    return out
+
+
+def involved_cells(c, n=3):
+    """Cells whose status the clue depends on."""
+    if c.cell is not None:
+        return [c.cell]
+    if c.a is not None:
+        return [c.a, c.b]
+    return resolve_region(c.region, n)
+
+
+@pytest.mark.parametrize("d", all_core_clues(), ids=lambda d: d["id"])
+def test_evaluator_matches_cnf(d):
+    c, n = clue(d), 3
+    vm = VarMap(n)
+    cnf = encode_clue(c, vm)
+    cells = involved_cells(c, n)
+    for bits in product([False, True], repeat=len(cells)):
+        assign = dict(zip(cells, bits))                       # {"A1": True, ...}
+        model = {vm.var(cell): val for cell, val in assign.items()}   # {1: True, ...}
+        assert satisfied(cnf, model) == evaluate(c, assign, n), \
+            f"{d['id']}: evaluator and CNF disagree on {assign}"
