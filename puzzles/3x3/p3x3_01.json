@@ -1,0 +1,50 @@
+{
+  "size": 3,
+  "characters": [
+    {
+      "cell": "A1", "name": "Abel", "job": "Astronaut",
+      "status": "INNOCENT", "revealed": true,
+      "clue": {"id": "c01", "type": "FACT", "cell": "B1", "status": "CRIMINAL"}
+    },
+    {
+      "cell": "B1", "name": "Bea", "job": "Cook",
+      "status": "CRIMINAL", "revealed": false,
+      "clue": {"id": "c02", "type": "FACT", "cell": "C1", "status": "INNOCENT"}
+    },
+    {
+      "cell": "C1", "name": "Clara", "job": "Guard",
+      "status": "INNOCENT", "revealed": false,
+      "clue": {"id": "c03", "type": "FACT", "cell": "A2", "status": "CRIMINAL"}
+    },
+    {
+      "cell": "A2", "name": "Derek", "job": "Cook",
+      "status": "CRIMINAL", "revealed": false,
+      "clue": {"id": "c04", "type": "FACT", "cell": "B2", "status": "INNOCENT"}
+    },
+    {
+      "cell": "B2", "name": "Eliza", "job": "Detective",
+      "status": "INNOCENT", "revealed": false,
+      "clue": {"id": "c05", "type": "FACT", "cell": "C2", "status": "CRIMINAL"}
+    },
+    {
+      "cell": "C2", "name": "Franz", "job": "Detective",
+      "status": "CRIMINAL", "revealed": false,
+      "clue": {"id": "c06", "type": "FACT", "cell": "A3", "status": "INNOCENT"}
+    },
+    {
+      "cell": "A3", "name": "Grant", "job": "Clerk",
+      "status": "INNOCENT", "revealed": false,
+      "clue": {"id": "c07", "type": "FACT", "cell": "B3", "status": "CRIMINAL"}
+    },
+    {
+      "cell": "B3", "name": "Hannah", "job": "Guard",
+      "status": "CRIMINAL", "revealed": false,
+      "clue": {"id": "c08", "type": "FACT", "cell": "C3", "status": "INNOCENT"}
+    },
+    {
+      "cell": "C3", "name": "Ivy", "job": "Clerk",
+      "status": "INNOCENT", "revealed": false,
+      "clue": {"id": "c09", "type": "FACT", "cell": "A1", "status": "INNOCENT"}
+    }
+  ]
+}
