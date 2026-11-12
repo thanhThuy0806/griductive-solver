@@ -127,3 +127,8 @@ Giữ Draft PR dựa trên nhánh Engine. Chuyển base về `main` khi nền En
 merge; chỉ ready khi đủ 3/3/1 màn chính thức, giữ logic gốc, cả bốn lớp kiểm chứng
 đều đạt và không còn readiness skip/phụ thuộc bắt buộc. Task Done sau review và
 merge. Chưa benchmark 5×5 vì chưa có nguồn màn phù hợp.
+
+Task 27 bổ sung [công cụ brute force độc lập](puzzle_uniqueness.md) để đối chiếu
+kiểm tra DPLL. Test nhanh tự kiểm tra thêm các màn 3×3/4×4; ca 5×5 đầy đủ chạy
+riêng bằng `python -m griductive.engine.puzzle_uniqueness`. Trạng thái chờ nguồn
+của bộ bảy màn ở trên vẫn còn hiệu lực.

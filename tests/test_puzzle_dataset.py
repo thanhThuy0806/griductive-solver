@@ -10,6 +10,7 @@ from griductive.core.constants import Status, VerdictResult
 from griductive.core.types import Clue, Puzzle
 from griductive.engine.game_engine import GameEngine
 from griductive.engine.puzzle_loader import load_puzzle, parse_puzzle
+from griductive.engine.puzzle_uniqueness import check_uniqueness
 from griductive.engine.verdict import classify
 from griductive.logic.cnf_encoder import encode_clue
 from griductive.logic.evaluator import evaluate
@@ -91,6 +92,16 @@ def test_dataset_clue_truth(path):
 @pytest.mark.parametrize("path", PATHS, ids=lambda p: p.name)
 def test_dataset_primary_uniqueness(path):
     assert_unique_answer(load_puzzle(path))
+
+
+@pytest.mark.parametrize("path", [p for p in PATHS if p.parent.name != "5x5"],
+                         ids=lambda p: p.name)
+def test_dataset_bruteforce_uniqueness(path):
+    puzzle = load_puzzle(path)
+    result = check_uniqueness(puzzle)
+    assert result.status == "UNIQUE"
+    assert result.solutions[0] == {c.cell: c.status is Status.CRIMINAL
+                                   for c in puzzle.characters}
 
 
 @pytest.mark.parametrize("path", PATHS, ids=lambda p: p.name)
