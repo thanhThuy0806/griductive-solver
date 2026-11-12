@@ -1,18 +1,24 @@
-"""Shared values used by puzzle data and logic modules."""
-
+"""Shared enums and constants (imports nothing from the project)."""
 from enum import Enum
+
+MAX_GRID = 26  # columns are letters A-Z
 
 
 class Status(str, Enum):
-    """Hidden or proved status of a character."""
-
+    """Hidden status of a character."""
     CRIMINAL = "CRIMINAL"
     INNOCENT = "INNOCENT"
 
 
-class ClueType(str, Enum):
-    """The six supported core clue templates."""
+class VerdictResult(str, Enum):
+    """Result of a player's verdict."""
+    ACCEPTED = "ACCEPTED"
+    NOT_PROVABLE = "NOT_PROVABLE"
+    CONTRADICTED = "CONTRADICTED"
 
+
+class ClueType(str, Enum):
+    """Clue templates (extension types are added here in Tasks 24-25)."""
     FACT = "FACT"
     SAME = "SAME"
     DIFFERENT = "DIFFERENT"
@@ -22,9 +28,12 @@ class ClueType(str, Enum):
 
 
 class RegionKind(str, Enum):
-    """Ways of selecting cells from the board."""
-
+    """Region kinds usable inside a clue."""
     ROW = "ROW"
     COL = "COL"
     NEIGHBORS = "NEIGHBORS"
     CELLS = "CELLS"
+
+
+BINARY_CLUE_TYPES = (ClueType.SAME, ClueType.DIFFERENT)
+COUNT_CLUE_TYPES = (ClueType.EXACTLY, ClueType.AT_LEAST, ClueType.AT_MOST)
