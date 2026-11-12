@@ -29,18 +29,6 @@ python -m pytest tests/                           # chạy test
 
 Yêu cầu: Python 3.10 trở lên.
 
-Schema và loader đã có: xem [hợp đồng dữ liệu](docs/interface.md) và puzzle mẫu
-`puzzles/3x3/p3x3_01.json`. Kiểm tra riêng phần đọc dữ liệu (không cần thư viện ngoài):
-
-```bash
-python -c "from griductive.engine.puzzle_loader import load_puzzle; print(load_puzzle('puzzles/3x3/p3x3_01.json'))"
-python -m unittest discover -s tests -v
-```
-
-Các lệnh GUI, `--solve` và thực nghiệm ở trên là cách chạy dự kiến; các phần đó
-hiện vẫn là skeleton. Loader chỉ kiểm tra cấu trúc và tham chiếu, chưa xác minh
-tính đúng logic hoặc nghiệm duy nhất của puzzle.
-
 ## 3. Cấu trúc thư mục
 
 ```
