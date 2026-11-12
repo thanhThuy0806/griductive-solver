@@ -100,7 +100,8 @@ thiết lập theo dõi nền. Chỉ cập nhật hợp đồng khi thực sự 
    Thay giá trị đáp án vào CNF để xác nhận đáp án thỏa mãn; sau đó thêm một clause
    loại đáp án trên biến ô và yêu cầu UNSAT. Không khóa các đáp án ẩn trong KB;
    biến phụ vẫn tự do, nên chỉ kiểm tra nghiệm duy nhất trên các biến ô.
-4. Engine cung cấp snapshot công khai; chọn ô chưa mở đầu tiên theo row-major
+4. Engine cung cấp snapshot GUI công khai và AgentKnowledge riêng cho classifier;
+   chọn ô chưa mở đầu tiên theo row-major
    có classification bắt buộc, submit rồi lấy snapshot mới. Không dùng đáp án
    riêng để chọn nước đi. Nếu không có nước đi, báo tên file, bước và ô còn úp.
 

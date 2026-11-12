@@ -97,6 +97,15 @@ class Puzzle:
 
 
 @dataclass(frozen=True)
+class AgentKnowledge:
+    """Detached evidence: initial givens plus accepted verdicts and revealed clues."""
+
+    size: int
+    revealed_clues: Tuple[Clue, ...]
+    proven_verdicts: Tuple[Tuple[CellId, Status], ...]
+
+
+@dataclass(frozen=True)
 class PublicCell:
     """One public card; status and clue are absent until it is revealed."""
 
