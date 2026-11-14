@@ -1,0 +1,157 @@
+{
+    "id":  "griductive-tutorial",
+    "game":  "griductive",
+    "date":  "tutorial",
+    "width":  3,
+    "height":  3,
+    "difficulty":  "Tutorial",
+    "traits":  [
+                   "innocent",
+                   "criminal",
+                   "innocent",
+                   "innocent",
+                   "criminal",
+                   "innocent",
+                   "criminal",
+                   "innocent",
+                   "innocent"
+               ],
+    "cards":  [
+                  {
+                      "name":  "Ada",
+                      "profession":  "teacher",
+                      "gender":  "female",
+                      "clue":  {
+                                   "atom":  "all_units_have_at_least_n_traits",
+                                   "unitType":  "row",
+                                   "trait":  "criminal",
+                                   "count":  1
+                               }
+                  },
+                  {
+                      "name":  "Ben",
+                      "profession":  "guard",
+                      "gender":  "male",
+                      "clue":  {
+                                   "atom":  "both_traits_are_neighbors_in_unit",
+                                   "unit":  {
+                                                "kind":  "col",
+                                                "col":  2
+                                            },
+                                   "trait":  "criminal"
+                               }
+                  },
+                  {
+                      "name":  "Cara",
+                      "profession":  "farmer",
+                      "gender":  "female",
+                      "clue":  {
+                                   "atom":  "number_of_traits_in_unit",
+                                   "unit":  {
+                                                "kind":  "row",
+                                                "row":  1
+                                            },
+                                   "trait":  "criminal",
+                                   "count":  1
+                               }
+                  },
+                  {
+                      "name":  "Dev",
+                      "profession":  "pilot",
+                      "gender":  "male",
+                      "clue":  {
+                                   "atom":  "number_of_traits_in_unit",
+                                   "unit":  {
+                                                "kind":  "row",
+                                                "row":  2
+                                            },
+                                   "trait":  "criminal",
+                                   "count":  1
+                               }
+                  },
+                  {
+                      "name":  "Elle",
+                      "profession":  "cook",
+                      "gender":  "female",
+                      "clue":  {
+                                   "atom":  "is_one_of_n_traits_in_unit",
+                                   "unit":  {
+                                                "kind":  "col",
+                                                "col":  2
+                                            },
+                                   "person":  4,
+                                   "trait":  "criminal",
+                                   "count":  2
+                               }
+                  },
+                  {
+                      "name":  "Finn",
+                      "profession":  "doctor",
+                      "gender":  "male",
+                      "clue":  {
+                                   "atom":  "more_traits_in_unit_than_unit",
+                                   "unitA":  {
+                                                 "kind":  "col",
+                                                 "col":  1
+                                             },
+                                   "unitB":  {
+                                                 "kind":  "col",
+                                                 "col":  3
+                                             },
+                                   "trait":  "criminal"
+                               }
+                  },
+                  {
+                      "name":  "Gwen",
+                      "profession":  "painter",
+                      "gender":  "female",
+                      "clue":  {
+                                   "atom":  "number_of_traits",
+                                   "trait":  "criminal",
+                                   "count":  3
+                               }
+                  },
+                  {
+                      "name":  "Hugo",
+                      "profession":  "builder",
+                      "gender":  "male",
+                      "clue":  {
+                                   "atom":  "number_of_traits_in_unit",
+                                   "unit":  {
+                                                "kind":  "col",
+                                                "col":  3
+                                            },
+                                   "trait":  "criminal",
+                                   "count":  0
+                               }
+                  },
+                  {
+                      "name":  "Isla",
+                      "profession":  "singer",
+                      "gender":  "female",
+                      "clue":  {
+                                   "atom":  "number_of_traits_in_unit",
+                                   "unit":  {
+                                                "kind":  "neighbor",
+                                                "person":  8
+                                            },
+                                   "trait":  "criminal",
+                                   "count":  1
+                               }
+                  }
+              ],
+    "testimonies":  [
+                        "Each row has at least one criminal",
+                        "Both criminals in column B are connected",
+                        "There is only one criminal in row 1",
+                        "There is only one criminal in row 2",
+                        "I am one of 2 criminals in column B",
+                        "There are more criminals in column A than column C",
+                        "There are 3 criminals in total",
+                        "There are no criminals in column C",
+                        "I have only one criminal neighbor"
+                    ],
+    "initialReveals":  [
+                           7
+                       ]
+}
