@@ -159,22 +159,23 @@ def test_agent_receives_only_public_cnf_and_solver_stats_work(data, monkeypatch)
     assert seen == [([[2], [-1]], 9)]
 
 
-def test_bridge_ignores_unrevealed_fields_even_in_handmade_snapshot(data):
+def test_bridge_rejects_gui_snapshot_even_if_it_contains_hidden_fields(data):
     puzzle = parse_puzzle(data)
     state = GameEngine(puzzle).get_public_state()
     hidden = replace(state.characters[-1], status=Status.CRIMINAL,
                      clue=puzzle.characters[-1].clue)
     state = replace(state, characters=(*state.characters[:-1], hidden))
-    assert classify(state, "C3") is Classification.UNKNOWN
+    with pytest.raises(TypeError, match="AgentKnowledge"):
+        classify(state, "C3")
 
 
 def test_restart_discards_revealed_clues_and_restores_initial_state(data):
     engine = GameEngine(parse_puzzle(data))
     initial = engine.get_public_state()
     engine.submit_verdict("B1", Status.CRIMINAL)
-    assert classify(engine.get_public_state(), "C1") is Classification.INNOCENT
+    assert classify(engine.get_agent_knowledge(), "C1") is Classification.INNOCENT
     assert engine.restart() == initial
-    assert classify(engine.get_public_state(), "C1") is Classification.UNKNOWN
+    assert classify(engine.get_agent_knowledge(), "C1") is Classification.UNKNOWN
     assert not engine.is_solved
 
 
@@ -237,9 +238,9 @@ def test_invalid_agent_return_does_not_reveal(data, invalid):
 
 
 def test_callback_error_and_mutation_do_not_change_engine(data):
-    def failing(state, cell):
-        state.characters[0].clue.params["changed"] = True
-        assert all(c.status is None and c.clue is None for c in state.characters[1:])
+    def failing(knowledge, cell):
+        knowledge.revealed_clues[0].params["changed"] = True
+        assert knowledge.proven_verdicts == (("A1", Status.INNOCENT),)
         raise RuntimeError("Agent failed")
 
     engine = GameEngine(parse_puzzle(data), classify=failing)

@@ -63,7 +63,7 @@ def play_publicly(puzzle: Puzzle) -> int:
         for character in state.characters:
             if character.revealed:
                 continue
-            verdict = classify(state, character.cell)
+            verdict = classify(engine.get_agent_knowledge(), character.cell)
             assert verdict is not Classification.INCONSISTENT, f"step {steps}: inconsistent KB"
             if not verdict.is_forced:
                 continue
