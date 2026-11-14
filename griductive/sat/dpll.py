@@ -1,9 +1,5 @@
-from __future__ import annotations
-"""DPLL solver with assumptions and statistics.
-
-Owner: B
-"""
 """DPLL SAT solver with unit propagation, conflict detection, and assumptions."""
+from __future__ import annotations
 
 import time
 from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
@@ -35,7 +31,7 @@ def unit_propagate(
     """Perform iterative unit propagation and conflict detection on a CNF formula.
 
     Returns (True, updated_assignment) if no conflict is detected, or
-    (False, updated_assignment) immediately upon encountering a falsified clause.
+    (False, updated_assignment) immediately upon encountering an falsified clause.
     """
     working = dict(assignment)
 
@@ -158,11 +154,12 @@ class DpllSolver:
 
     def __init__(self, clauses: Optional[CNF] = None, num_vars: Optional[int] = None) -> None:
         """Initialize the solver with an optional base CNF formula and variable count."""
-        self._base_clauses: List[Tuple[Literal, ...]] = (
+        self._base_clauses: List[ Tuple[Literal, ...] ] = (
             [tuple(c) for c in clauses] if clauses else []
         )
         self._num_vars = num_vars
         self.stats = SatStats()
+        self._last_call_stats = SatStats()
 
     def add_clause(self, clause: Clause) -> None:
         """Append a single DIMACS clause to the solver's base formula."""
@@ -178,6 +175,16 @@ class DpllSolver:
     def reset_stats(self) -> None:
         """Reset cumulative solver statistics."""
         self.stats.reset()
+        self._last_call_stats.reset()
+
+    @property
+    def last_stats(self) -> Dict[str, float | int]:
+        """Return the dictionary of statistics from the most recent solve() call."""
+        return getattr(self, "_last_call_stats", SatStats()).to_dict()
+
+    def get_stats_dict(self) -> Dict[str, float | int]:
+        """Return cumulative solver statistics as a dictionary."""
+        return self.stats.to_dict()
 
     def solve(
         self,
@@ -198,17 +205,22 @@ class DpllSolver:
         total_vars = num_vars if num_vars is not None else self._num_vars
         variables = _collect_variables(active_clauses, assumptions, total_vars)
 
+        # 1. Apply assumptions and check for immediate contradiction among assumptions
         consistent, initial_assign = _apply_assumptions(assumptions)
         if not consistent:
             call_stats.runtime_ms = (time.perf_counter() - start_time) * 1000.0
+            self._last_call_stats = call_stats
             self.stats.add(call_stats)
             return SatResult(satisfiable=False, model=None, stats=call_stats)
 
+        # Count each unique assumption variable that is not already explicitly a unit clause
+        # or simply pass initial_assign into the recursive DPLL procedure.
         sat, final_assign = self._dpll_recursive(
             active_clauses, variables, initial_assign, call_stats
         )
 
         call_stats.runtime_ms = (time.perf_counter() - start_time) * 1000.0
+        self._last_call_stats = call_stats
         self.stats.add(call_stats)
 
         if sat and final_assign is not None:
@@ -234,10 +246,12 @@ class DpllSolver:
 
         var = _pick_variable(variables, propagated)
         if var is None:
+            # No unassigned variables left, check if all clauses are satisfied
             if _all_clauses_satisfied(clauses, propagated):
                 return True, propagated
             return False, None
 
+        # Branch deterministically: try True first, then backtrack and try False
         for branch_val in (True, False):
             stats.decisions += 1
             next_assignment = dict(propagated)
