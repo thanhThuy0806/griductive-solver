@@ -54,7 +54,8 @@ griductive-solver/
 │   │   ├── evaluator.py        #   evaluator ngữ nghĩa trực tiếp (không dùng CNF)
 │   │   ├── cnf_encoder.py      #   clue -> CNF
 │   │   ├── kb_builder.py       #   KB_t = CNF(clue đã lộ) + unit clauses, đếm biến/clause
-│   │   └── extensions/         #   ít nhất 2 extension (mỗi file: encoder + evaluator)
+│   │   ├── extensions/         #   ít nhất 2 extension (mỗi file: encoder + evaluator)
+|   |   └── clue_validator.py   #   kiểm tra clue/region trước khi mã hoá
 │   │
 │   ├── sat/                    # DPLL
 │   │   ├── dpll.py
