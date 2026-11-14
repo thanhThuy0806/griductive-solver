@@ -3,18 +3,20 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from griductive.core.constants import ClueType, RegionKind, Status
+from griductive.core.constants import (
+    ClueType,
+    RegionKind,
+    Status,
+    VerdictResult,
+)
 
 
 CellId = str
-Assignment = Dict[CellId, bool]  # True = Criminal
-Clause = List[int]
+Assignment = Dict[CellId, bool]   # True = Criminal
+Clause = List[int]                # DIMACS style: [1, -2] means C1 or not C2
 CNF = List[Clause]
 
-_CLUE_FIELDS = (
-    "id", "type", "cell", "status",
-    "a", "b", "k", "region"
-)
+_CLUE_FIELDS = ("id", "type", "cell", "status", "a", "b", "k", "region")
 
 
 class ClueError(ValueError):
@@ -51,7 +53,7 @@ class Region:
             kind=kind,
             index=d.get("index"),
             of_cell=d.get("of_cell", d.get("of")),
-            cells=tuple(cells)
+            cells=tuple(cells),
         )
 
 
@@ -70,12 +72,12 @@ class Clue:
     params: Dict[str, Any] = field(
         default_factory=dict,
         compare=False,
-        hash=False
+        hash=False,
     )
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "Clue":
-        """Build a Clue from its JSON object."""
+        """Build a Clue from its JSON object; unknown keys go to params."""
 
         if not isinstance(d, dict):
             raise ClueError(f"Clue must be an object, got {d!r}")
@@ -98,9 +100,7 @@ class Clue:
             try:
                 status = Status(status)
             except (ValueError, TypeError):
-                raise ClueError(
-                    f"[{cid}] bad status {status!r}"
-                ) from None
+                raise ClueError(f"[{cid}] bad status {status!r}") from None
 
         region = d.get("region")
 
@@ -122,7 +122,7 @@ class Clue:
             b=d.get("b"),
             k=d.get("k"),
             region=region,
-            params=extra
+            params=extra,
         )
 
 
@@ -144,3 +144,33 @@ class Puzzle:
 
     size: int
     characters: List[Cell]
+
+
+@dataclass(frozen=True)
+class PublicCell:
+    """One public card; status and clue are absent until it is revealed."""
+
+    cell: CellId
+    name: str
+    job: str
+    revealed: bool
+    status: Optional[Status] = None
+    clue: Optional[Clue] = None
+
+
+@dataclass(frozen=True)
+class PublicState:
+    """Detached public snapshot in row-major order, without hidden answers."""
+
+    size: int
+    characters: Tuple[PublicCell, ...]
+
+
+@dataclass(frozen=True)
+class VerdictResponse:
+    """Result of submitting a status; new_clue exists only on acceptance."""
+
+    cell: CellId
+    status: Status
+    result: VerdictResult
+    new_clue: Optional[Clue] = None

@@ -7,6 +7,7 @@ from pathlib import Path
 from griductive.core.constants import ClueType, RegionKind, Status
 from griductive.core.regions import resolve_region
 from griductive.core.types import Cell, Clue, Puzzle, Region
+from griductive.logic.clue_validator import validate_clue
 
 
 def _object(data: object, fields: set[str], path: str) -> dict:
@@ -53,7 +54,7 @@ def _region(data: object, size: int, path: str) -> Region:
             raise ValueError(f"{path}.cells: expected a list")
         region = Region(kind=kind, cells=tuple(data["cells"]))
     elif kind == RegionKind.NEIGHBORS:
-        region = Region(kind=kind, of_cell=data["of"])
+        region = Region(kind=kind, of=data["of"])
     else:
         region = Region(kind=kind, index=data["index"])
     try:
@@ -88,7 +89,7 @@ def _clue(data: object, board: tuple[str, ...], size: int, path: str) -> Clue:
 
 
 def parse_puzzle(data: object) -> Puzzle:
-    """Validate decoded JSON and return an immutable, row-major private puzzle."""
+    """Validate decoded JSON and return a detached, row-major private puzzle."""
     data = _object(data, {"size", "characters"}, "puzzle")
     size = data["size"]
     if type(size) is not int or size not in (3, 4, 5):
@@ -112,13 +113,17 @@ def parse_puzzle(data: object) -> Puzzle:
         if type(character["revealed"]) is not bool:
             raise ValueError(f"{path}.revealed: expected a boolean")
         clue = _clue(character["clue"], board, size, f"{path}.clue")
+        try:
+            validate_clue(clue, size)
+        except ValueError as error:
+            raise ValueError(f"{path}.clue: {error}") from error
         if clue.id in clue_ids:
             raise ValueError(f"{path}.clue.id: duplicate clue id {clue.id}")
         clue_ids.add(clue.id)
         cells[cell] = Cell(cell, name, job, status, character["revealed"], clue)
     if not any(cell.revealed for cell in cells.values()):
         raise ValueError("puzzle.characters: at least one character must be revealed")
-    return Puzzle(size=size, characters=tuple(cells[cell] for cell in board))
+    return Puzzle(size=size, characters=[cells[cell] for cell in board])
 
 
 def load_puzzle(path: str | Path) -> Puzzle:

@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Tuple
 from griductive.core.constants import MAX_GRID, RegionKind
 from griductive.core.types import CellId, ClueError, Region
 
+
 _CELL_RE = re.compile(r"[A-Z][0-9]+")
 _RESOLVERS: Dict[RegionKind, Callable[[Region, int], List[CellId]]] = {}
 
@@ -16,7 +17,7 @@ def cell_id(row: int, col: int) -> CellId:
 
 
 def parse_cell(cid: CellId, n: int) -> Tuple[int, int]:
-    """Convert a cell id to 0-based (row, col)."""
+    """Convert an id such as 'B2' to 0-based (row, col)."""
     if not isinstance(cid, str) or not _CELL_RE.fullmatch(cid):
         raise ClueError(f"Malformed cell id: {cid!r}")
 
@@ -30,15 +31,17 @@ def parse_cell(cid: CellId, n: int) -> Tuple[int, int]:
 
 
 def all_cells(n: int) -> List[CellId]:
-    """Return every cell id in row-major order."""
+    """Return every cell id in row-major order: A1, B1, ..., A2, B2, ..."""
     return [cell_id(r, c) for r in range(n) for c in range(n)]
 
 
 def region_kind(kind: RegionKind):
     """Register a resolver function for a region kind."""
+
     def deco(fn):
         _RESOLVERS[kind] = fn
         return fn
+
     return deco
 
 
@@ -67,6 +70,7 @@ def _column(region: Region, n: int) -> List[CellId]:
         raise ClueError(f"Column must be a letter in A..{last}, got {letter!r}")
 
     col = ord(letter) - ord("A")
+
     return [cell_id(r, col) for r in range(n)]
 
 
@@ -77,6 +81,7 @@ def _neighbors(region: Region, n: int) -> List[CellId]:
 
     r0, c0 = parse_cell(region.of_cell, n)
 
+    # Return the 8 surrounding cells, excluding the center cell.
     return [
         cell_id(r, c)
         for r in range(n)
@@ -91,7 +96,7 @@ def _cells(region: Region, n: int) -> List[CellId]:
         raise ClueError("CELLS: only cells is allowed")
 
     if not isinstance(region.cells, tuple):
-        raise ClueError("cells: expected a tuple")
+        raise ClueError("cells: expected a tuple of cell identifiers")
 
     return list(region.cells)
 

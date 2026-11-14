@@ -2,11 +2,12 @@
 
 from enum import Enum
 
+
 MAX_GRID = 26  # columns are letters A-Z
 
 
 class Status(str, Enum):
-    """Hidden or proved status of a character."""
+    """Hidden status of a character."""
 
     CRIMINAL = "CRIMINAL"
     INNOCENT = "INNOCENT"
