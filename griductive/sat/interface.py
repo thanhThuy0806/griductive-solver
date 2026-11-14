@@ -1,11 +1,11 @@
 """Contract between the SAT solver and its users (Agent, experiments).
-
+ 
 Owner: B (implements DpllSolver against this) / A (consumes it).
-
+ 
 Any solver used by the Agent must provide `solve(clauses) -> SolveResult`.
 `clauses` is a list of clauses in DIMACS style: each clause is a list of non-zero
 ints, `3` means C3 and `-3` means NOT C3.
-
+ 
 Rules for implementers:
   * satisfiable=True  -> `model` is a complete assignment {var: bool} for every
     variable that appears in `clauses`.
