@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import unittest
+import itertools
 
 try:
     from griductive.sat.dpll import (
@@ -13,6 +14,36 @@ except ImportError:
         DpllSolver, dpll_solve, unit_propagate, _apply_assumptions
     )
     from stats import SatStats, SatResult
+
+def brute_force_solve(clauses: list[list[int]], num_vars: int) -> bool:
+    """Brute-force itterate through 2^N cases to check with DPLL."""
+    if not clauses:
+        return True
+        
+    variables = list(range(1, num_vars + 1))
+    
+    # Generate all 2^N combinations (True, False)
+    for values in itertools.product([True, False], repeat=num_vars):
+        assignment = dict(zip(variables, values))
+        
+        formula_satisfied = True
+        for clause in clauses:
+            clause_satisfied = False
+            for lit in clause:
+                var = abs(lit)
+                val = assignment[var]
+                if (lit > 0 and val) or (lit < 0 and not val):
+                    clause_satisfied = True
+                    break
+            
+            if not clause_satisfied:
+                formula_satisfied = False
+                break
+                
+        if formula_satisfied:
+            return True
+            
+    return False
 
 
 class TestSatStatsUpdated(unittest.TestCase):
@@ -171,6 +202,64 @@ class TestApplyAssumptions(unittest.TestCase):
     def test_aa_zero_literal(self):
         with self.assertRaises(ValueError):
             _apply_assumptions([0])
+
+class TestDpllSolver(unittest.TestCase):
+    """Test suite verifying unit propagation, conflict detection, branching, and assumptions."""
+
+    def test_brute_force_crosscheck_spec_example(self) -> None:
+        """Brute force on small CNF; example KB (A v B) ^ (~A v B)"""
+        # A = 1, B = 2
+        # KB = (A v B) ^ (~A v B)
+        kb = [[1, 2], [-1, 2]]
+        
+        # Brute-force
+        is_sat_brute = brute_force_solve(kb, num_vars=2)
+        
+        # DPLL
+        res_dpll = dpll_solve(kb, num_vars=2)
+        
+        # Compare 2 methods
+        self.assertEqual(is_sat_brute, res_dpll.satisfiable)
+        self.assertTrue(res_dpll.satisfiable)
+        
+        # In theory, model must sastisfy B = True
+        self.assertTrue(res_dpll.model[2])
+
+    def test_entailment_example_from_spec(self) -> None:
+        """Exam logic( entailment)"""
+        # KB = (C_A v C_B) ^ (~C_A v C_B)
+        kb = [[1, 2], [-1, 2]]
+        solver = DpllSolver(kb, num_vars=2)
+
+        # If B is Innocent (-2): KB ^ -2 must be UNSAT -> B is said to be CRIMINAL
+        res_b_innocent = solver.solve(assumptions=[-2])
+        self.assertFalse(res_b_innocent.satisfiable)
+
+        # If A is Criminal (1) and A is Innocent (-1): both are wrong SAT -> A is UNKNOWN
+        self.assertTrue(solver.solve(assumptions=[1]).satisfiable)
+        self.assertTrue(solver.solve(assumptions=[-1]).satisfiable)
+
+    def test_branching_and_backtracking_unsat_3sat(self) -> None:
+        """Check on brute force, require UNSAT formulation backtracking."""
+        clauses = [
+            [1, 2, 3], [1, 2, -3], [1, -2, 3], [1, -2, -3],
+            [-1, 2, 3], [-1, 2, -3], [-1, -2, 3], [-1, -2, -3],
+        ]
+        
+        is_sat_brute = brute_force_solve(clauses, num_vars=3)
+        res_dpll = dpll_solve(clauses, num_vars=3)
+        
+        self.assertEqual(is_sat_brute, res_dpll.satisfiable)
+        self.assertFalse(res_dpll.satisfiable)
+        self.assertGreater(res_dpll.stats.decisions, 0)
+        self.assertGreater(res_dpll.stats.backtracks, 0)
+
+    def test_contradictory_assumptions(self) -> None:
+        """DPLL must return UNSAT immediately assumptions when find contradiction [1, -1]."""
+        res = dpll_solve([[1, 2]], assumptions=[1, -1])
+        self.assertFalse(res.satisfiable)
+        self.assertIsNone(res.model)
+
 
 if __name__ == "__main__":
     unittest.main()
