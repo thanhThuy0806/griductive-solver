@@ -1,17 +1,21 @@
 """Shared enums and constants (imports nothing from the project)."""
+
 from enum import Enum
+
 
 MAX_GRID = 26  # columns are letters A-Z
 
 
 class Status(str, Enum):
     """Hidden status of a character."""
+
     CRIMINAL = "CRIMINAL"
     INNOCENT = "INNOCENT"
 
 
 class VerdictResult(str, Enum):
     """Result of a player's verdict."""
+
     ACCEPTED = "ACCEPTED"
     NOT_PROVABLE = "NOT_PROVABLE"
     CONTRADICTED = "CONTRADICTED"
@@ -19,6 +23,7 @@ class VerdictResult(str, Enum):
 
 class ClueType(str, Enum):
     """Clue templates (extension types are added here in Tasks 24-25)."""
+
     FACT = "FACT"
     SAME = "SAME"
     DIFFERENT = "DIFFERENT"
@@ -29,6 +34,7 @@ class ClueType(str, Enum):
 
 class RegionKind(str, Enum):
     """Region kinds usable inside a clue."""
+
     ROW = "ROW"
     COL = "COL"
     NEIGHBORS = "NEIGHBORS"
@@ -36,4 +42,9 @@ class RegionKind(str, Enum):
 
 
 BINARY_CLUE_TYPES = (ClueType.SAME, ClueType.DIFFERENT)
-COUNT_CLUE_TYPES = (ClueType.EXACTLY, ClueType.AT_LEAST, ClueType.AT_MOST)
+
+COUNT_CLUE_TYPES = (
+    ClueType.EXACTLY,
+    ClueType.AT_LEAST,
+    ClueType.AT_MOST,
+)
