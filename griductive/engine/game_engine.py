@@ -6,21 +6,22 @@ from typing import Callable
 from griductive.agent.entailment import Classification
 from griductive.core.constants import Status, VerdictResult
 from griductive.core.regions import all_cells
-from griductive.core.types import PublicCell, PublicState, Puzzle, VerdictResponse
-from griductive.engine.verdict import EngineConsistencyError, classify as classify_public
+from griductive.core.types import AgentKnowledge, PublicCell, PublicState, Puzzle, VerdictResponse
+from griductive.engine.agent_knowledge import project_clue
+from griductive.engine.verdict import EngineConsistencyError, classify as classify_agent
 
 
 class GameEngine:
     """Own a validated private puzzle and expose only detached public snapshots."""
 
     def __init__(self, puzzle: Puzzle,
-                 classify: Callable[[PublicState, str], Classification] | None = None) -> None:
+                 classify: Callable[[AgentKnowledge, str], Classification] | None = None) -> None:
         """Copy a loader-validated puzzle; use the real Agent bridge by default."""
         if classify is not None and not callable(classify):
             raise TypeError("classify must be callable")
         self._puzzle = deepcopy(puzzle)
         self._cells = {character.cell: character for character in self._puzzle.characters}
-        self._classify = classify_public if classify is None else classify
+        self._classify = classify_agent if classify is None else classify
         self._revealed = {cell.cell for cell in self._puzzle.characters if cell.revealed}
 
     def get_public_state(self) -> PublicState:
@@ -36,6 +37,16 @@ class GameEngine:
             ))
         return PublicState(size=self._puzzle.size, characters=tuple(characters))
 
+    def get_agent_knowledge(self) -> AgentKnowledge:
+        """Return only revealed clue semantics and initial/accepted public statuses."""
+        opened = [self._cells[cell] for cell in all_cells(self._puzzle.size)
+                  if cell in self._revealed]
+        return AgentKnowledge(
+            size=self._puzzle.size,
+            revealed_clues=tuple(project_clue(c.clue, self._puzzle.size) for c in opened),
+            proven_verdicts=tuple((c.cell, c.status) for c in opened),
+        )
+
     def submit_verdict(self, cell: str, status: Status) -> VerdictResponse:
         """Reveal one card only when the public Agent proves the submitted status."""
         if not isinstance(cell, str) or cell not in self._cells:
@@ -45,7 +56,7 @@ class GameEngine:
         if cell in self._revealed:
             raise ValueError("The card is already revealed")
 
-        classification = self._classify(self.get_public_state(), cell)
+        classification = self._classify(self.get_agent_knowledge(), cell)
         if not isinstance(classification, Classification):
             raise TypeError("Agent must return Classification")
         if classification is Classification.INCONSISTENT:
