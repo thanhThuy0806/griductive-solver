@@ -8,6 +8,18 @@ from griductive.core.types import AgentKnowledge, Clue, Region
 from griductive.logic.clue_validator import validate_clue
 
 
+def _clean_region(region: Region) -> Region:
+    if type(region) is not Region or not isinstance(region.kind, RegionKind):
+        raise ValueError("Unsupported region")
+    if region.kind in (RegionKind.ROW, RegionKind.COL):
+        return Region(region.kind, index=region.index)
+    elif region.kind is RegionKind.NEIGHBORS:
+        return Region(region.kind, of=region.of)
+    elif region.kind is RegionKind.CELLS:
+        return Region(region.kind, cells=tuple(c for c in region.cells))
+    raise ValueError("Unsupported region kind")
+
+
 def project_clue(clue: Clue, size: int) -> Clue:
     """Rebuild a supported clue without metadata, unused fields or shared payloads."""
     if type(clue) is not Clue:
@@ -21,18 +33,17 @@ def project_clue(clue: Clue, size: int) -> Clue:
     elif clue.type in (ClueType.SAME, ClueType.DIFFERENT):
         clean = Clue(clue.id, clue.type, a=clue.a, b=clue.b)
     elif clue.type in (ClueType.EXACTLY, ClueType.AT_LEAST, ClueType.AT_MOST):
-        region = clue.region
-        if type(region) is not Region or not isinstance(region.kind, RegionKind):
-            raise ValueError("Unsupported region")
-        if region.kind in (RegionKind.ROW, RegionKind.COL):
-            clean_region = Region(region.kind, index=region.index)
-        elif region.kind is RegionKind.NEIGHBORS:
-            clean_region = Region(region.kind, of=region.of)
-        elif region.kind is RegionKind.CELLS:
-            clean_region = Region(region.kind, cells=tuple(c for c in region.cells))
-        else:
-            raise ValueError("Unsupported region kind")
-        clean = Clue(clue.id, clue.type, k=clue.k, region=clean_region)
+        clean = Clue(clue.id, clue.type, k=clue.k, region=_clean_region(clue.region))
+    elif clue.type is ClueType.PARITY:
+        clean = Clue(clue.id, clue.type, parity=clue.parity, region=_clean_region(clue.region))
+    elif clue.type is ClueType.COMPARE:
+        clean = Clue(
+            clue.id,
+            clue.type,
+            region_a=_clean_region(clue.region_a),
+            region_b=_clean_region(clue.region_b),
+            op=clue.op,
+        )
     else:
         raise ValueError("Unsupported clue type")
     validate_clue(clean, size)
@@ -67,6 +78,12 @@ def validate_knowledge(knowledge: AgentKnowledge) -> None:
             raise ValueError("Clue contains metadata or unused fields")
         if clue.region is not None:
             if vars(clue.region) != vars(clean.region) or type(clue.region.cells) is not tuple:
+                raise ValueError("Region contains metadata or unused fields")
+        if clue.region_a is not None:
+            if vars(clue.region_a) != vars(clean.region_a) or type(clue.region_a.cells) is not tuple:
+                raise ValueError("Region contains metadata or unused fields")
+        if clue.region_b is not None:
+            if vars(clue.region_b) != vars(clean.region_b) or type(clue.region_b.cells) is not tuple:
                 raise ValueError("Region contains metadata or unused fields")
         if clue.id in seen_ids:
             raise ValueError("Duplicate clue id")
