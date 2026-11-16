@@ -61,6 +61,8 @@ Ngoài hai trường chung, chỉ nhận đúng trường tương ứng với lo
 | `EXACTLY` | `k`, `region` | Chính xác k tội phạm trong vùng |
 | `AT_LEAST` | `k`, `region` | Ít nhất k tội phạm trong vùng |
 | `AT_MOST` | `k`, `region` | Nhiều nhất k tội phạm trong vùng |
+| `PARITY` | `parity`, `region` | Extension 1: Chẵn/lẻ số tội phạm trong vùng (`EVEN` / `ODD`) |
+| `COMPARE` | `region_a`, `region_b`, `op` | Extension 2: So sánh số tội phạm 2 vùng (`MORE` / `EQUAL` / `LESS`) |
 
 `cell`, `a`, `b` phải là tọa độ có trên bàn; `status` dùng hai giá trị như trên.
 `a` và `b` phải khác nhau, theo validator dùng chung của Duy.
@@ -86,6 +88,8 @@ Tất cả kết quả resolve region được sắp theo thứ tự hàng trư�
 {"id": "c05", "type": "AT_LEAST", "k": 1, "region": {"kind": "COL", "index": "B"}}
 {"id": "c06", "type": "AT_MOST", "k": 1, "region": {"kind": "NEIGHBORS", "of": "B2"}}
 {"id": "c07", "type": "EXACTLY", "k": 0, "region": {"kind": "CELLS", "cells": ["A1", "C3"]}}
+{"id": "c08", "type": "PARITY", "parity": "EVEN", "region": {"kind": "ROW", "index": 1}}
+{"id": "c09", "type": "COMPARE", "region_a": {"kind": "ROW", "index": 1}, "region_b": {"kind": "COL", "index": "A"}, "op": "MORE"}
 ```
 
 Mỗi dòng trên là một ví dụ riêng, không phải một file JSON hoàn chỉnh.
@@ -252,7 +256,8 @@ chiếu Engine/Puzzle/Cell. get_agent_knowledge đọc tập thẻ mở nội b�
 snapshot bên ngoài. Tên/nghề không cần cho sáu clue hiện tại vì đã dùng tọa độ.
 
 Mỗi clue được dựng mới chỉ với id/type và trường có ý nghĩa: FACT dùng cell/status;
-SAME/DIFFERENT dùng a/b; EXACTLY/AT_LEAST/AT_MOST dùng k/region. Region mới chỉ
+SAME/DIFFERENT dùng a/b; EXACTLY/AT_LEAST/AT_MOST dùng k/region; PARITY dùng parity/region;
+COMPARE dùng region_a/region_b/op. Region mới chỉ
 giữ index cho ROW/COL, of cho NEIGHBORS hoặc tuple cells cho CELLS. params luôn
 là dict rỗng; không chuyển metadata/trường dư. Kiểu clue/region chưa hỗ trợ gây
 lỗi; khi thêm extension phải mở rộng rõ projector, validator, encoder và test.
