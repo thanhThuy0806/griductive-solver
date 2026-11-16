@@ -47,7 +47,7 @@ def region_kind(kind: RegionKind):
 
 @region_kind(RegionKind.ROW)
 def _row(region: Region, n: int) -> List[CellId]:
-    if region.of_cell is not None or region.cells:
+    if region.of is not None or region.cells:
         raise ClueError("ROW: only index is allowed")
 
     idx = region.index
@@ -60,7 +60,7 @@ def _row(region: Region, n: int) -> List[CellId]:
 
 @region_kind(RegionKind.COL)
 def _column(region: Region, n: int) -> List[CellId]:
-    if region.of_cell is not None or region.cells:
+    if region.of is not None or region.cells:
         raise ClueError("COL: only index is allowed")
 
     letter = region.index
@@ -77,9 +77,12 @@ def _column(region: Region, n: int) -> List[CellId]:
 @region_kind(RegionKind.NEIGHBORS)
 def _neighbors(region: Region, n: int) -> List[CellId]:
     if region.index is not None or region.cells:
-        raise ClueError("NEIGHBORS: only of_cell is allowed")
+        raise ClueError("NEIGHBORS: only of is allowed")
 
-    r0, c0 = parse_cell(region.of_cell, n)
+    target = region.of if region.of is not None else region.of_cell
+    if target is None:
+        raise ClueError("NEIGHBORS: requires of")
+    r0, c0 = parse_cell(target, n)
 
     # Return the 8 surrounding cells, excluding the center cell.
     return [
@@ -92,7 +95,7 @@ def _neighbors(region: Region, n: int) -> List[CellId]:
 
 @region_kind(RegionKind.CELLS)
 def _cells(region: Region, n: int) -> List[CellId]:
-    if region.index is not None or region.of_cell is not None:
+    if region.index is not None or region.of is not None:
         raise ClueError("CELLS: only cells is allowed")
 
     if not isinstance(region.cells, tuple):

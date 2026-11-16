@@ -4,7 +4,7 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from griductive.core.constants import ClueType, RegionKind, Status
+from griductive.core.constants import ClueType, CompareOp, Parity, RegionKind, Status
 from griductive.core.regions import resolve_region
 from griductive.core.types import Cell, Clue, Puzzle, Region
 from griductive.logic.clue_validator import validate_clue
@@ -70,7 +70,9 @@ def _clue(data: object, board: tuple[str, ...], size: int, path: str) -> Clue:
     kind = _enum(ClueType, data.get("type"), f"{path}.type")
     fields = {ClueType.FACT: {"cell", "status"}, ClueType.SAME: {"a", "b"},
               ClueType.DIFFERENT: {"a", "b"}, ClueType.EXACTLY: {"k", "region"},
-              ClueType.AT_LEAST: {"k", "region"}, ClueType.AT_MOST: {"k", "region"}}
+              ClueType.AT_LEAST: {"k", "region"}, ClueType.AT_MOST: {"k", "region"},
+              ClueType.PARITY: {"parity", "region"},
+              ClueType.COMPARE: {"region_a", "region_b", "op"}}
     _object(data, {"id", "type"} | fields[kind], path)
     clue_id = _text(data["id"], f"{path}.id")
     if kind == ClueType.FACT:
@@ -81,6 +83,15 @@ def _clue(data: object, board: tuple[str, ...], size: int, path: str) -> Clue:
         return Clue(id=clue_id, type=kind,
                     a=_reference(data["a"], board, f"{path}.a"),
                     b=_reference(data["b"], board, f"{path}.b"))
+    if kind == ClueType.PARITY:
+        parity_val = _enum(Parity, data["parity"], f"{path}.parity")
+        region = _region(data["region"], size, f"{path}.region")
+        return Clue(id=clue_id, type=kind, parity=parity_val, region=region)
+    if kind == ClueType.COMPARE:
+        op_val = _enum(CompareOp, data["op"], f"{path}.op")
+        region_a = _region(data["region_a"], size, f"{path}.region_a")
+        region_b = _region(data["region_b"], size, f"{path}.region_b")
+        return Clue(id=clue_id, type=kind, region_a=region_a, region_b=region_b, op=op_val)
     region = _region(data["region"], size, f"{path}.region")
     count = len(resolve_region(region, size))
     if type(data["k"]) is not int or not 0 <= data["k"] <= count:
