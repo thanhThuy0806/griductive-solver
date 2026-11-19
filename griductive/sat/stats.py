@@ -99,6 +99,7 @@ class SatResult:
     satisfiable: bool
     model: Optional[Dict[int, bool]] = None
     stats: SatStats = field(default_factory=SatStats)
+    timed_out: bool = False
 
     @property
     def stats_dict(self) -> Dict[str, float | int]:
@@ -111,6 +112,7 @@ class SatResult:
             "satisfiable": self.satisfiable,
             "model": self.model,
             "stats": self.stats.to_dict(),
+            "timed_out": self.timed_out,
         }
 
     def __iter__(self) -> Iterator[Any]:
