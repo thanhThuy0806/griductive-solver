@@ -1,0 +1,9 @@
+puzzle,dataset,size,accepted_steps,agent_sat_calls,status,private_metadata_test,gui_snapshot_blocked_test
+puzzles/3x3/p3x3_01.json,regression,3,8,72,SOLVED,PASS,PASS
+puzzles/3x3/p3x3_02.json,task26,3,8,50,SOLVED,PASS,PASS
+puzzles/3x3/p3x3_03.json,task26,3,8,56,SOLVED,PASS,PASS
+puzzles/3x3/p3x3_04.json,task26,3,8,52,SOLVED,PASS,PASS
+puzzles/4x4/p4x4_01.json,task26,4,15,203,SOLVED,PASS,PASS
+puzzles/4x4/p4x4_02.json,task26,4,15,163,SOLVED,PASS,PASS
+puzzles/4x4/p4x4_03.json,task26,4,15,174,SOLVED,PASS,PASS
+puzzles/5x5/p5x5_01.json,task26,5,24,366,SOLVED,PASS,PASS

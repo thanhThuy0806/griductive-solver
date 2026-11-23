@@ -1,7 +1,8 @@
 # Hợp đồng puzzle JSON, loader và Game Engine
 
-Hợp đồng v3 ngày 13/11/2026: tách AgentKnowledge khỏi snapshot GUI, chuẩn hóa
-callback Engine–Agent. Kế thừa core, encoder và DPLL đã tích hợp ở v2.
+Hợp đồng v4 ngày 23/11/2026: giữ AgentKnowledge của v3 và bổ sung AgentAPI
+để nối LogicAgent thật với encoder/Engine, lọc cả clue mới được mở.
+Kế thừa core, encoder và DPLL của nhóm, gồm PARITY/COMPARE.
 Giữ tên trường JSON theo README; không thêm trường
 version vào JSON. Loader kiểm tra cấu trúc; Engine kiểm tra verdict bằng suy luận.
 Kiểm tra toàn bộ clue đúng với đáp án và nghiệm duy nhất vẫn là bước riêng.
@@ -322,8 +323,8 @@ Bàn giao cho các thành viên (người dùng chuyển giúp):
 
 - **Thúy:** callback mới nhận AgentKnowledge, trả Classification; core chứa DTO
   nên Agent không cần import Engine. EntailmentChecker vẫn dùng classify(clauses,
-  var) hiện có. LogicAgent/Hint/Auto Solve/trace chờ phần triển khai của Thúy;
-  khi tích hợp phải chạy lại test hợp đồng tests/test_agent_knowledge.py.
+  var) hiện có. LogicAgent/Hint/Auto Solve/trace đã có; AgentAPI ở mục 7 nối
+  các protocol hiện tại mà không sửa thuật toán hoặc thêm import Engine vào Agent.
 - **Duy:** core/encoder đồng bộ theo nhánh của anh, chỉ bổ sung ba DTO công khai;
   loader cập nhật theo of, vùng không rỗng và hai ô binary khác nhau.
   V3 bổ sung AgentKnowledge; extension phải khai báo trường được xuất sang Agent.
@@ -337,9 +338,106 @@ Task 28: nhánh feat/d-engine-agent-api dựa trên task 27 tại d14b873. Calle
 callback test và lộ trình dataset đã chuyển sang AgentKnowledge. Kiểm chứng được
 bằng entailment/DPLL thật và sample hiện có, không phụ thuộc đủ bảy màn.
 
-Kiểm thử task 28: 358 passed, 97 subtests passed, 1 skipped (readiness task 26).
+Kiểm thử ban đầu task 28 ngày 13/11: 358 passed, 97 subtests passed, 1 skipped
+(readiness task 26). Kết quả mới nhất và đường tích hợp đầy đủ ở mục 7.
 Lệnh chạy: `python -m pytest tests/ unit_tests/dpll.py unit_tests/dpll_stats.py -q -rs`.
 Nếu thư mục tạm pytest mặc định bị lỗi quyền, thêm
 `--basetemp=.pytest_cache/agent-tmp`. Test hợp đồng bao phủ DTO/metadata, dữ kiện
 ẩn không ảnh hưởng classification, request độc lập, chu kỳ verdict/restart, lỗi
 trước solver và kiểm tra import AST tuyệt đối/tương đối của package Agent.
+
+## 7. AgentAPI và nghiệm thu task 28 ngày 23/11/2026
+
+Nhánh `feat/d-engine-agent-api` đã đồng bộ task 26/27 tại `c853b6b`: đủ bộ bảy
+puzzle và các extension/DPLL mới. Bộ phân loại cấp thấp vẫn nhận AgentKnowledge;
+snapshot GUI và API GameEngine giữ nguyên. Adapter mới nằm trong
+`griductive/engine/agent_api.py`, không đặt ở package Agent và không đưa Puzzle
+cho LogicAgent.
+
+### Nối LogicAgent thật
+
+```python
+from griductive.agent.logic_agent import RunStatus
+from griductive.engine.agent_api import AgentAPI
+from griductive.engine.game_engine import GameEngine
+from griductive.engine.puzzle_loader import load_puzzle
+
+engine = GameEngine(load_puzzle("puzzles/3x3/p3x3_04.json"))
+api = AgentAPI(engine)
+agent = api.create_agent()
+hint = agent.hint()  # chỉ đọc KB công khai, không mở thẻ
+result = agent.run(api)
+assert result.status is RunStatus.SOLVED
+assert engine.is_solved
+
+engine.restart()
+agent = api.create_agent()  # tạo lại KB/trace từ đúng các thẻ hiện đang mở
+```
+
+`AgentAPI` thực hiện cả `ClueEncoder` và `GameInterface` mà LogicAgent hiện dùng:
+
+| API | Hợp đồng |
+| --- | --- |
+| `size` | Kích thước công khai, lấy từ AgentKnowledge |
+| `public_cards()` | Tuple PublicCard chỉ gồm cell, status dạng chuỗi và clue dictionary đã lọc của thẻ mở |
+| `create_agent()` | Agent mới dùng DPLL thật và dữ kiện công khai hiện tại; không mặc định dùng StubSolver |
+| `var_of(cell)` | Dùng VarMap chung, cùng thứ tự biến với encoder/Engine |
+| `encode_clue(data)` | Từ chối metadata/trường không dùng rồi gọi encoder chung; giữ cùng VarMap để biến phụ không trùng |
+| `submit_verdict(cell, status)` | Đổi chuỗi sang Status, gọi Engine, trả protocol VerdictResponse(result, clue) của Agent |
+
+Hai kiểu VerdictResponse vẫn có vai trò riêng: Engine trả `new_clue` dạng Clue,
+adapter trả `clue` dạng dictionary cho protocol có sẵn của Agent. Không tự sửa
+thuật toán Agent, fakes/test của Thúy hoặc schema JSON để ép hai interface giống nhau.
+
+### Ranh giới dữ liệu
+
+- Khởi tạo Agent chỉ đọc `get_agent_knowledge()`, không đọc `get_public_state()`.
+  Hai tuple clue/status của Engine đều theo thứ tự thẻ mở row-major, một clue
+  trên một status; adapter kiểm tra số lượng trước khi ghép thành PublicCard.
+- Dictionary gửi sang Agent chỉ có id/type và các trường ngữ nghĩa tương ứng
+  của tám loại clue ở mục 2. Region chỉ giữ kind và index/of/cells có ý nghĩa.
+  Không chuyển tên/nghề, params, trường dư, snapshot GUI hoặc đáp án ẩn.
+- Sau ACCEPTED, adapter chiếu lại `new_clue` qua cùng bộ lọc trước khi trả cho
+  Agent. Việc một clue đã được mở không làm metadata tùy ý trở thành dữ kiện hợp lệ.
+  Dictionary/list được dựng mới, sửa payload không sửa Engine hoặc request khác.
+- NOT_PROVABLE/CONTRADICTED không trả clue và không đổi dữ kiện. Thẻ đã mở,
+  tọa độ/status sai hoặc lỗi classifier không được thêm vào KB.
+- Engine kiểm tra kiểu và tham số của clue sắp mở trước khi thay đổi tập thẻ
+  mở. Clue không được hỗ trợ gây lỗi và giữ nguyên trạng thái; metadata GUI vẫn
+  được sao chép theo hợp đồng cũ, còn adapter Agent luôn lọc bỏ.
+  Kiểm tra này không thay thế evaluator/uniqueness offline về tính đúng của puzzle.
+
+Sau Restart hoặc sau khi người chơi mở thẻ qua GUI, tạo lại Agent từ
+`api.create_agent()` trước khi tiếp tục Hint/Auto Solve; Agent cũ có KB/trace
+riêng và không tự đồng bộ với thao tác bên ngoài. Load puzzle khác thì tạo
+Engine và AgentAPI mới. Không dùng đồng thời nhiều thao tác sửa bàn.
+
+Đây là hợp đồng API giữa các module tin cậy trong cùng tiến trình. Adapter giữ
+callback tới các thao tác công khai của Engine; không cung cấp sandbox chống mã
+Python cố ý introspect callback/bộ nhớ. Công cụ uniqueness offline không được dùng
+làm nguồn dữ kiện cho Agent.
+
+### Kết quả kiểm chứng
+
+`tests/test_engine_agent_api.py` chạy LogicAgent + encoder + DPLL + Engine thật
+trên bảy màn và mẫu regression. Test chặn việc đọc snapshot GUI, gắn metadata
+chứa đáp án lên cả clue mở/úp, rồi yêu cầu mọi màn SOLVED và trace không chứa
+metadata đó. Kiểm tra thêm hidden-data independence của KB/phân loại/Hint,
+payload độc lập, lọc PARITY/COMPARE và region, verdict bị từ chối, input sai,
+clue đầu ra lỗi, Restart và KB mâu thuẫn. Các test AgentKnowledge và kiến trúc
+Agent không import Engine vẫn được giữ.
+
+Kết quả: **90 test tích hợp/hợp đồng qua**; toàn bộ **527 passed,
+97 subtests passed**, không có skip. Mẫu 3x3 mở 8 thẻ, 4x4 mở 15 thẻ và
+5x5 mở 24 thẻ. [CSV bàn giao](../results/raw/20261123_engine_agent_api.csv) ghi
+status, số lượt và SAT calls của Agent; không tính SAT calls kiểm tra lại ở
+Engine, nên không so trực tiếp với CSV lộ trình task 26.
+
+```powershell
+python -m pytest tests/test_engine_agent_api.py tests/test_agent_knowledge.py tests/test_engine_verdict.py -q -rs
+python -m pytest tests/ unit_tests/dpll.py unit_tests/dpll_stats.py -q -rs
+```
+
+Đường API đã được kiểm chứng độc lập với GUI. Chưa nối các nút GUI hoặc
+`main.py --solve`; đó là caller có thể dùng ví dụ trên cho phần tích hợp tiếp.
+Task sẵn sàng để review/merge, không tự đổi bảng phân công hoặc trạng thái PR.
