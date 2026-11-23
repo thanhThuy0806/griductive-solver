@@ -11,6 +11,7 @@ from griductive.core.types import Clue, ClueError
 from griductive.engine import puzzle_uniqueness as uniqueness
 from griductive.engine.puzzle_loader import load_puzzle, parse_puzzle
 from griductive.logic import evaluator
+from griductive.logic import cnf_encoder
 from griductive.logic.cnf_encoder import encode_clue
 from griductive.logic.variable_map import VarMap
 from griductive.sat.dpll import DpllSolver
@@ -107,6 +108,15 @@ CLUES = [
     {"type": "AT_MOST", "k": 0, "region": {"kind": "NEIGHBORS", "of": "A1"}},
     {"type": "EXACTLY", "k": 2,
      "region": {"kind": "CELLS", "cells": ["B1", "C1"]}},
+    *({"type": "PARITY", "parity": parity,
+       "region": {"kind": "ROW", "index": 1}} for parity in ("EVEN", "ODD")),
+    *({"type": "COMPARE", "op": op,
+       "region_a": {"kind": "CELLS", "cells": ["B1"]},
+       "region_b": {"kind": "CELLS", "cells": ["C1"]}}
+      for op in ("MORE", "EQUAL", "LESS")),
+    {"type": "COMPARE", "op": "MORE",
+     "region_a": {"kind": "CELLS", "cells": ["A1", "B1"]},
+     "region_b": {"kind": "CELLS", "cells": ["B1", "C1"]}},
 ]
 
 
@@ -125,6 +135,7 @@ def test_semantic_bruteforce_agrees_with_dpll(clue_data):
     sat_solutions = []
     while len(sat_solutions) < 2:
         result = DpllSolver().solve(clauses)
+        assert not result.timed_out
         if not result.satisfiable:
             break
         solution = {vm.cell(v): result.model[v] for v in range(1, 10)}
@@ -137,16 +148,27 @@ def test_semantic_bruteforce_agrees_with_dpll(clue_data):
         assert brute.solutions[0] == sat_solutions[0]
 
 
-def test_preflight_surfaces_unsupported_late_clue(monkeypatch):
+@pytest.mark.parametrize("kind", ["AT_MOST", "PARITY", "COMPARE"])
+def test_preflight_surfaces_unsupported_late_clue(monkeypatch, kind):
     puzzle = make_puzzle()
     puzzle.characters[0].clue = Clue("false", ClueType.FACT,
                                      cell="A1", status=Status.CRIMINAL)
-    puzzle.characters[-1].clue = Clue.from_dict({
-        "id": "unsupported", "type": "AT_MOST", "k": 0,
-        "region": {"kind": "ROW", "index": 1}})
-    monkeypatch.delitem(evaluator._EVALUATORS, ClueType.AT_MOST)
+    clue_data = next(data for data in CLUES if data["type"] == kind)
+    puzzle.characters[-1].clue = Clue.from_dict({"id": "unsupported", **clue_data})
+    monkeypatch.delitem(evaluator._EVALUATORS, ClueType(kind))
     with pytest.raises(ClueError, match="unsupported.*no evaluator"):
         uniqueness.check_uniqueness(puzzle)
+
+
+def test_bruteforce_does_not_call_encoder_or_sat(monkeypatch):
+    def forbidden(*args, **kwargs):
+        pytest.fail("brute force must be independent of CNF and DPLL")
+
+    monkeypatch.setattr(cnf_encoder, "encode_clue", forbidden)
+    monkeypatch.setattr(DpllSolver, "solve", forbidden)
+    result = uniqueness.check_uniqueness(load_puzzle(SAMPLE))
+    assert result.status == "UNIQUE"
+    assert result.assignments_checked == 256
 
 
 def write_puzzle(tmp_path, name, data):
