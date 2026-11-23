@@ -69,6 +69,7 @@ class GameEngine:
             raise EngineConsistencyError("Proved verdict conflicts with puzzle data")
 
         clue = deepcopy(self._cells[cell].clue)
+        project_clue(clue, self._puzzle.size)  # Validate the outgoing clue before revealing.
         self._revealed.add(cell)
         return VerdictResponse(cell, status, VerdictResult.ACCEPTED, clue)
 
