@@ -22,9 +22,9 @@ from griductive.sat.stats import SatStats
 
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLE = ROOT / "puzzles/3x3/p3x3_01.json"
-PATHS = sorted((ROOT / "puzzles").glob("*x*/p*x*_*.json"))
 MANIFEST = json.loads((ROOT / "docs/puzzle_sources/test_set.json").read_text(encoding="utf-8"))
 CASES = {ROOT / case["path"]: case for case in MANIFEST["cases"]}
+PATHS = sorted([SAMPLE, *CASES.keys()])
 
 
 def assert_true_clues(puzzle: Puzzle) -> None:

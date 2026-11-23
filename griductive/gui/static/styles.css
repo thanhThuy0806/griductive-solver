@@ -1,0 +1,678 @@
+:root {
+  /* Two Dots inspired soft pastel palette */
+  --bg-top: #fbd5e3;
+  --bg-mid: #fce8e4;
+  --bg-bottom: #e8f5fa;
+
+  --surface: #ffffff;
+  --surface-soft: #faf7fa;
+  --border-soft: rgba(74, 71, 115, 0.08);
+
+  --plum: #3f3d66;
+  --plum-muted: #7c799b;
+  --pink: #e56b9c;
+  --pink-soft: #fff0f6;
+  --pink-pill: #fde0ec;
+  --teal: #429ec2;
+  --teal-soft: #eef9fd;
+  --teal-pill: #d6f0fa;
+  --lavender: #9c7bb8;
+  --apricot: #f28d52;
+  --apricot-soft: #fff5ee;
+
+  --shadow-tray: 0 14px 36px rgba(63, 61, 102, 0.09);
+  --shadow-card: 0 4px 12px rgba(63, 61, 102, 0.06);
+  --shadow-float: 0 8px 20px rgba(63, 61, 102, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+body {
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+  background: linear-gradient(
+    180deg,
+    var(--bg-top) 0%,
+    var(--bg-mid) 55%,
+    var(--bg-bottom) 100%
+  );
+  color: var(--plum);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 236px 1fr 310px;
+  height: 100vh;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Floating Sidebars */
+.sidebar,
+.inspector {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: var(--shadow-tray);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar {
+  padding: 20px 14px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 16px;
+  border-bottom: 2px dashed rgba(63, 61, 102, 0.08);
+  margin-bottom: 14px;
+}
+
+.brand-dots {
+  display: grid;
+  grid-template-columns: repeat(2, 10px);
+  gap: 5px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+.d-pink {
+  background: var(--pink);
+}
+.d-teal {
+  background: var(--teal);
+}
+.d-plum {
+  background: var(--plum);
+}
+.d-peach {
+  background: var(--apricot);
+}
+
+.brand h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  font-size: 11.5px;
+  color: var(--plum-muted);
+  font-weight: 600;
+}
+
+.sidebar-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--plum-muted);
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.puzzle-group-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--lavender);
+  margin: 12px 0 6px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.puzzle-item {
+  width: 100%;
+  text-align: left;
+  padding: 9px 14px;
+  margin-bottom: 5px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--plum);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.puzzle-item:hover {
+  background: var(--pink-soft);
+  color: var(--pink);
+}
+.puzzle-item.active {
+  background: var(--plum);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(63, 61, 102, 0.22);
+}
+
+/* Center Workspace */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 14px;
+}
+
+/* HUD Top Bar */
+.hud-bar {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 22px;
+  box-shadow: var(--shadow-float);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hud-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hud-caption {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--plum-muted);
+}
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.level-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--plum);
+}
+
+.pill-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--pink-pill);
+  color: var(--pink);
+}
+
+.hud-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease,
+    background 0.14s ease;
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.btn-soft {
+  background: #f2eff6;
+  color: var(--plum);
+}
+.btn-soft:hover:not(:disabled) {
+  background: #e8e3f0;
+}
+
+.btn-teal {
+  background: var(--teal-pill);
+  color: var(--teal);
+}
+.btn-teal:hover:not(:disabled) {
+  background: #c1e7f7;
+}
+
+.btn-plum {
+  background: var(--plum);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(63, 61, 102, 0.22);
+}
+.btn-plum:hover:not(:disabled) {
+  background: #312f54;
+}
+
+.btn-danger {
+  background: var(--pink);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(229, 107, 156, 0.3);
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+/* Feedback Banner */
+.feedback {
+  padding: 11px 18px;
+  border-radius: 18px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+.feedback.info {
+  background: var(--teal-soft);
+  color: #266c8a;
+}
+.feedback.warn {
+  background: var(--apricot-soft);
+  color: #b5541d;
+}
+.feedback.error {
+  background: var(--pink-soft);
+  color: #b33267;
+}
+.feedback.success {
+  background: #eafaf2;
+  color: #1b7a4f;
+}
+
+/* Board Stage (fixed vertical clipping on overflow) */
+.board-stage {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  padding: 6px 4px 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.board-stage::-webkit-scrollbar {
+  display: none;
+}
+
+.board-tray {
+  margin: auto;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 28px;
+  padding: 22px 26px 26px 18px;
+  box-shadow: var(--shadow-tray);
+}
+
+.board-grid {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+  justify-items: center;
+}
+
+.coord-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--plum-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+/* Character Card (Two Dots tactile squircle style) */
+.card {
+  width: 178px;
+  min-height: 136px;
+  background: var(--surface-soft);
+  border: 2px solid rgba(63, 61, 102, 0.08);
+  border-radius: 20px;
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.card.revealed {
+  cursor: pointer;
+}
+.card.revealed:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float);
+}
+
+.card.innocent {
+  background: var(--teal-soft);
+  border-color: rgba(66, 158, 194, 0.32);
+}
+
+.card.criminal {
+  background: var(--pink-soft);
+  border-color: rgba(229, 107, 156, 0.35);
+}
+
+.card.selected-clue {
+  border-color: var(--plum);
+  box-shadow:
+    0 0 0 3px rgba(63, 61, 102, 0.18),
+    var(--shadow-float);
+}
+
+.card.highlighted {
+  border-color: var(--apricot);
+  box-shadow:
+    0 0 0 3px rgba(242, 141, 82, 0.35),
+    var(--shadow-float);
+  transform: translateY(-2px);
+}
+
+.card.hinted {
+  border-color: var(--teal);
+  box-shadow:
+    0 0 0 3px rgba(66, 158, 194, 0.35),
+    var(--shadow-float);
+}
+
+.card.dimmed {
+  opacity: 0.42;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+.card.shake {
+  animation: shake 0.28s ease;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.card-cell {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--plum-muted);
+}
+
+.status-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ece8f2;
+  color: var(--plum-muted);
+  letter-spacing: 0.03em;
+}
+.card.innocent .status-pill {
+  background: var(--teal-pill);
+  color: var(--teal);
+}
+.card.criminal .status-pill {
+  background: var(--pink-pill);
+  color: var(--pink);
+}
+
+.card-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--plum);
+  line-height: 1.2;
+}
+.card-job {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--plum-muted);
+  margin-bottom: 8px;
+}
+
+.card-clue {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.38;
+  color: var(--plum);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  padding: 7px 9px;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.act-btn {
+  padding: 6px 4px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+.act-btn:hover {
+  transform: scale(1.03);
+}
+.act-innocent {
+  background: var(--teal-pill);
+  color: var(--teal);
+}
+.act-innocent:hover {
+  background: #bde6f7;
+}
+.act-criminal {
+  background: var(--pink-pill);
+  color: var(--pink);
+}
+.act-criminal:hover {
+  background: #fbc9de;
+}
+
+/* Right Inspector */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 12px 12px 0;
+  gap: 6px;
+}
+
+.tab {
+  padding: 9px 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--plum-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab.active {
+  background: var(--plum);
+  color: #ffffff;
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.tab-content.active {
+  display: block;
+}
+
+.panel-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--plum-muted);
+  background: var(--surface-soft);
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+.clue-item {
+  padding: 11px 13px;
+  border: 2px solid transparent;
+  background: var(--surface-soft);
+  border-radius: 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.clue-item:hover {
+  background: #f4eff8;
+}
+.clue-item.active {
+  border-color: var(--apricot);
+  background: var(--apricot-soft);
+}
+
+.clue-item-head {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--plum);
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.clue-count-pill {
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--lavender);
+}
+.clue-item-text {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #54517a;
+  line-height: 1.4;
+}
+
+.trace-item {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border-left: 4px solid var(--lavender);
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.trace-item strong {
+  color: var(--plum);
+}
+
+.puzzle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diff-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.diff-easy {
+  background: #e6f7ee;
+  color: #1b7a4f;
+}
+.diff-medium {
+  background: var(--teal-pill);
+  color: var(--teal);
+}
+.diff-hard {
+  background: var(--apricot-soft);
+  color: #c75c1e;
+}
+.diff-expert {
+  background: var(--pink-pill);
+  color: var(--pink);
+}
+
+.puzzle-item.active .diff-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+.card-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+
+.card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid rgba(63, 61, 102, 0.08);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.card-profile .card-job {
+  margin-bottom: 0;
+}

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Griductive Solver</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- Left Sidebar: Puzzle List -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-dots" aria-hidden="true">
+            <span class="dot d-pink"></span>
+            <span class="dot d-teal"></span>
+            <span class="dot d-plum"></span>
+            <span class="dot d-peach"></span>
+          </div>
+          <div>
+            <h1>Griductive</h1>
+            <span class="subtitle">Logic Deduction Game</span>
+          </div>
+        </div>
+
+        <div class="sidebar-label">Chọn màn chơi</div>
+        <div id="puzzle-list" class="puzzle-list"></div>
+      </aside>
+
+      <!-- Center Workspace -->
+      <main class="workspace">
+        <header class="hud-bar">
+          <div class="hud-left">
+            <span class="hud-caption">LEVEL</span>
+            <div class="level-row">
+              <span id="current-level-title" class="level-title"
+                >Chọn màn chơi</span
+              >
+              <span id="progress-badge" class="pill-badge">0 / 0</span>
+            </div>
+          </div>
+
+          <div class="hud-controls">
+            <button id="btn-restart" class="btn btn-soft" disabled>
+              Restart
+            </button>
+            <button id="btn-hint" class="btn btn-teal" disabled>Hint</button>
+            <button id="btn-step" class="btn btn-soft" disabled>AI Step</button>
+            <button id="btn-auto" class="btn btn-plum" disabled>
+              Auto Solve
+            </button>
+          </div>
+        </header>
+
+        <!-- Feedback Toast Banner -->
+        <div id="feedback-banner" class="feedback hidden">
+          <span id="feedback-text"></span>
+          <button id="btn-apply-hint" class="btn btn-sm btn-teal hidden">
+            Áp dụng gợi ý
+          </button>
+        </div>
+
+        <!-- Pastel Board Stage -->
+        <section class="board-stage">
+          <div class="board-tray">
+            <div id="board-grid" class="board-grid"></div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Right Inspector: Clues & AI Trace -->
+      <aside class="inspector">
+        <div class="tabs">
+          <button class="tab active" data-tab="clues">Manh mối</button>
+          <button class="tab" data-tab="trace">AI Trace</button>
+        </div>
+
+        <div id="tab-clues" class="tab-content active">
+          <div class="panel-hint">
+            Bấm <strong>Innocent</strong> hoặc <strong>Criminal</strong> trên
+            thẻ chưa lật để tự giải tay. Nhấn vào thẻ đã lật hoặc manh mối để tô
+            sáng các ô liên quan.
+          </div>
+          <div id="clue-list" class="clue-list"></div>
+        </div>
+
+        <div id="tab-trace" class="tab-content">
+          <div id="trace-list" class="trace-list"></div>
+        </div>
+      </aside>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
