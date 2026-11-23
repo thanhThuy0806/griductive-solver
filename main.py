@@ -13,8 +13,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.solve:
         raise NotImplementedError("TODO (A): wire Engine + Agent")
-    raise NotImplementedError("TODO (E): launch GUI")
-
+    from griductive.gui.app import run # imported here so --solve works without a display
+    run()
 
 if __name__ == "__main__":
     main()
