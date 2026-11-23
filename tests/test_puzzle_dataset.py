@@ -129,6 +129,7 @@ def test_dataset_bruteforce_uniqueness(path):
     puzzle = load_puzzle(path)
     result = check_uniqueness(puzzle)
     assert result.status == "UNIQUE"
+    assert result.assignments_checked == 2 ** sum(not c.revealed for c in puzzle.characters)
     assert result.solutions[0] == {c.cell: c.status is Status.CRIMINAL
                                    for c in puzzle.characters}
 

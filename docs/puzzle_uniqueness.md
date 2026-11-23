@@ -1,6 +1,8 @@
 # Task 27 — Kiểm tra nghiệm duy nhất bằng brute force
 
-Nhánh `feat/d-puzzle-uniqueness-bruteforce`, dựa trên task 26 tại `45e7c84`.
+Nhánh `feat/d-puzzle-uniqueness-bruteforce`, đã đồng bộ task 26 tại `424f2da`
+ngày 23/11/2026. Bộ nghiệm thu gồm đúng bảy màn trong
+[test_set.json](puzzle_sources/test_set.json); mẫu FACT được kiểm tra thêm riêng.
 Công cụ kiểm tra dữ liệu dùng loader và evaluator hiện có; không thay phần
 `agent/uniqueness.py` của Thúy. Không thay schema JSON hoặc luồng Game Engine.
 
@@ -55,7 +57,7 @@ python -m griductive.engine.puzzle_uniqueness puzzles/3x3/p3x3_01.json
 python -m griductive.engine.puzzle_uniqueness puzzles/5x5/p5x5_01.json
 ```
 
-Lệnh cuối dành cho khi đã có file 5×5 phù hợp. Không có đường dẫn: đọc mọi `.json`
+Không có đường dẫn: đọc mọi `.json`
 trong `puzzles/3x3`, `4x4`, `5x5` theo vị trí repository, kể cả chạy từ thư mục khác.
 Đường dẫn truyền rõ được hiểu tương đối với thư mục hiện tại. Không đọc nguồn chờ
 trong `docs/puzzle_sources/`.
@@ -103,3 +105,61 @@ Test nhanh đối chiếu brute force với DPLL cho mọi màn 3x3/4x4, và kh�
 readiness. Bàn 5x5 vẫn kiểm tra đầy đủ bằng CLI riêng, không đưa vòng duyệt lớn
 vào test nhanh. Kết quả của lần chạy đầy đủ được ghi trong tài liệu task 26.
 Nghiệm thu của nhóm vẫn cần review và merge, tách khỏi trạng thái test xanh.
+
+## Nghiệm thu đầy đủ task 27 ngày 23/11/2026
+
+Giữ nguyên thuật toán brute force đã có. Không dùng SAT để cắt nhánh, không thêm
+unit clause từ status ẩn và không giới hạn số cách gán khi kết luận UNIQUE.
+Các thay đổi mới tập trung vào đồng bộ dữ liệu/phụ thuộc, bổ sung kiểm thử và
+lưu bằng chứng của lần chạy đầy đủ, bao gồm 5x5.
+
+| Puzzle | Ô chưa mở | Không gian gán | Brute force | DPLL trên biến ô |
+| --- | ---: | ---: | --- | --- |
+| `p3x3_02.json` | 8 | 256 | UNIQUE | UNIQUE, cùng đáp án |
+| `p3x3_03.json` | 8 | 256 | UNIQUE | UNIQUE, cùng đáp án |
+| `p3x3_04.json` | 8 | 256 | UNIQUE | UNIQUE, cùng đáp án |
+| `p4x4_01.json` | 15 | 32.768 | UNIQUE | UNIQUE, cùng đáp án |
+| `p4x4_02.json` | 15 | 32.768 | UNIQUE | UNIQUE, cùng đáp án |
+| `p4x4_03.json` | 15 | 32.768 | UNIQUE | UNIQUE, cùng đáp án |
+| `p5x5_01.json` | 24 | 16.777.216 | UNIQUE | UNIQUE, cùng đáp án |
+
+Mẫu regression `p3x3_01.json` cũng UNIQUE sau 256 cách gán. Các màn được kiểm
+tra bằng tất cả clue (kể cả thẻ úp) và chỉ status mở ban đầu. Không nhầm phép
+kiểm tra offline này với dữ kiện được phép đưa vào vòng suy luận Agent.
+Tổng bộ bảy màn duyệt **16.876.288** cách gán. CLI hoàn tất với exit code 0;
+riêng màn 5x5 mất **108.764,109 ms** (khoảng 108,8 giây) trong lần chạy này.
+
+Đối chiếu DPLL sử dụng `agent.uniqueness.count_solutions` với `DpllSolver` thật:
+encode toàn bộ clue, thêm unit của thẻ mở ban đầu, lấy model rồi chặn model trên
+biến chính. Mỗi màn cần hai SAT calls: một SAT và một UNSAT. Việc đối chiếu đáp
+án lưu chỉ thực hiện sau khi mỗi thuật toán đã tìm nghiệm; hai witness cùng
+khớp đáp án nên khớp nhau. Không dùng status ẩn để dựng công thức tìm nghiệm.
+
+Bằng chứng:
+
+- [Log CLI đầy đủ](../results/raw/20261123_puzzle_uniqueness.txt): kết luận,
+  số cách gán đã duyệt và runtime cho từng file; đường dẫn được chuẩn hóa về
+  tương đối với repository để không phụ thuộc thư mục máy cá nhân.
+- [Bảng đối chiếu](../results/raw/20261123_puzzle_uniqueness.csv): tách bộ bảy màn
+  khỏi regression, kết quả brute force/DPLL, witness, runtime và SHA-256 của
+  từng file puzzle sau chuẩn hóa UTF-8/LF. Witness trong bảng là dữ liệu offline,
+  không truyền cho Agent.
+
+Test nhanh bổ sung EVEN/ODD, MORE/EQUAL/LESS và so sánh hai vùng có giao nhau.
+Kiểm tra preflight phát hiện evaluator extension bị thiếu dù clue trước đó sai.
+Một test cấm gọi encoder/DPLL trong brute force. Với từng fixture 3x3/4x4,
+test còn yêu cầu số cách gán đã duyệt bằng toàn bộ không gian ô chưa mở.
+Các ca UNSAT, MULTIPLE, đáp án lưu sai, không sửa input và lỗi CLI vẫn được giữ.
+
+Kết quả: **75 test liên quan**, toàn bộ **506 passed, 97 subtests passed**,
+không có skip. Lần chạy đầy đủ 5x5 được thực hiện riêng, không đưa 16 triệu
+cách gán vào suite nhanh. Môi trường: Windows, Python 3.12.13; không timeout.
+
+```powershell
+python -m pytest tests/test_puzzle_uniqueness.py tests/test_puzzle_dataset.py -q -rs
+python -m griductive.engine.puzzle_uniqueness
+python -m pytest tests/ unit_tests/dpll.py unit_tests/dpll_stats.py -q -rs
+```
+
+Không thay `agent/uniqueness.py`, GUI hoặc vòng Auto Solve. Bộ kiểm chứng đã sẵn
+sàng để reviewer đối chiếu trước khi đánh dấu task Done và merge.
