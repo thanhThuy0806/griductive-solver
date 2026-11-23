@@ -1,0 +1,9 @@
+puzzle,size,primary_vars,aux_vars,clauses,sat_calls,decisions,propagations,backtracks,steps,runtime_ms,status,note,joint_steps,reveal_order
+puzzles/3x3/p3x3_01.json,3,9,0,10,32,0,176,0,8,2.217,SOLVED,regression fixture,0,"B1,C1,A2,B2,C2,A3,B3,C3"
+puzzles/3x3/p3x3_02.json,3,9,0,229,67,27,446,0,8,14.125,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",1,"C1,C2,C3,B2,A1,B1,A3,A2"
+puzzles/3x3/p3x3_03.json,3,9,0,67,74,28,398,0,8,7.205,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",2,"B3,C3,C1,A1,B1,C2,A2,B2"
+puzzles/3x3/p3x3_04.json,3,9,0,66,70,61,441,8,8,14.654,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",3,"B1,B3,A3,C3,A2,A1,C1,C2"
+puzzles/4x4/p4x4_01.json,4,16,0,248,245,33,2375,4,15,44.753,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",2,"B4,C1,C2,B3,C3,C4,D3,D2,D4,A1,A2,A3,B2,B1,D1"
+puzzles/4x4/p4x4_02.json,4,16,0,194,218,426,1864,16,15,93.254,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",7,"B4,B2,C4,D4,D1,C3,D2,D3,A1,B1,C1,A2,C2,A3,B3"
+puzzles/4x4/p4x4_03.json,4,16,0,137,193,19,2023,0,15,49.24,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",3,"B4,A3,A2,B2,C4,B1,C2,C3,B3,C1,A1,D1,D2,D3,D4"
+puzzles/5x5/p5x5_01.json,5,25,0,375,449,1268,6142,4,24,179.516,SOLVED,"task 26; Engine + EntailmentChecker; row-major, one card per step",5,"B5,C5,E1,E3,C4,D4,E4,B2,C2,A2,B1,D2,B3,E2,A4,A1,A3,B4,D5,C1,D1,C3,D3,E5"

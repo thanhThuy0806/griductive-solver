@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from griductive.core.constants import (
     ClueType,
+    CompareOp,
+    Parity,
     RegionKind,
     Status,
     VerdictResult,
@@ -16,7 +18,11 @@ Assignment = Dict[CellId, bool]   # True = Criminal
 Clause = List[int]                # DIMACS style: [1, -2] means C1 or not C2
 CNF = List[Clause]
 
-_CLUE_FIELDS = ("id", "type", "cell", "status", "a", "b", "k", "region")
+_CLUE_FIELDS = (
+    "id", "type", "cell", "status",
+    "a", "b", "k", "region",
+    "parity", "region_a", "region_b", "op", "comparator",
+)
 
 
 class ClueError(ValueError):
@@ -29,8 +35,31 @@ class Region:
 
     kind: RegionKind
     index: Optional[Union[int, str]] = None
-    of_cell: Optional[CellId] = None
+    of: Optional[CellId] = None
     cells: Tuple[CellId, ...] = ()
+
+    def __init__(
+        self,
+        kind: RegionKind,
+        index: Optional[Union[int, str]] = None,
+        of: Optional[CellId] = None,
+        cells: Tuple[CellId, ...] = (),
+        of_cell: Optional[CellId] = None,
+    ):
+        if of is None and of_cell is not None:
+            of = of_cell
+        object.__setattr__(self, "kind", kind)
+        object.__setattr__(self, "index", index)
+        object.__setattr__(self, "of", of)
+        object.__setattr__(
+            self,
+            "cells",
+            tuple(cells) if isinstance(cells, (list, tuple)) else cells,
+        )
+
+    @property
+    def of_cell(self) -> Optional[CellId]:
+        return self.of
 
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "Region":
@@ -52,7 +81,7 @@ class Region:
         return cls(
             kind=kind,
             index=d.get("index"),
-            of_cell=d.get("of_cell", d.get("of")),
+            of=d.get("of", d.get("of_cell")),
             cells=tuple(cells),
         )
 
@@ -69,6 +98,10 @@ class Clue:
     b: Optional[CellId] = None
     k: Optional[int] = None
     region: Optional[Region] = None
+    parity: Optional[Union[str, Parity]] = None
+    region_a: Optional[Region] = None
+    region_b: Optional[Region] = None
+    op: Optional[Union[str, CompareOp]] = None
     params: Dict[str, Any] = field(
         default_factory=dict,
         compare=False,
@@ -103,9 +136,32 @@ class Clue:
                 raise ClueError(f"[{cid}] bad status {status!r}") from None
 
         region = d.get("region")
-
         if region is not None:
             region = Region.from_dict(region)
+
+        parity = d.get("parity")
+        if parity is not None:
+            try:
+                parity = Parity(parity)
+            except (ValueError, TypeError):
+                pass
+
+        region_a = d.get("region_a")
+        if region_a is not None:
+            region_a = Region.from_dict(region_a)
+        elif ctype == ClueType.COMPARE and region is not None:
+            region_a = region
+
+        region_b = d.get("region_b")
+        if region_b is not None:
+            region_b = Region.from_dict(region_b)
+
+        op = d.get("op", d.get("comparator"))
+        if op is not None:
+            try:
+                op = CompareOp(op)
+            except (ValueError, TypeError):
+                pass
 
         extra = {
             key: val
@@ -122,6 +178,10 @@ class Clue:
             b=d.get("b"),
             k=d.get("k"),
             region=region,
+            parity=parity,
+            region_a=region_a,
+            region_b=region_b,
+            op=op,
             params=extra,
         )
 

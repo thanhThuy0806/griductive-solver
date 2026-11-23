@@ -1,0 +1,147 @@
+{
+  "size": 3,
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Ada",
+      "job": "Teacher",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c01",
+        "type": "AT_MOST",
+        "k": 1,
+        "region": {
+          "kind": "ROW",
+          "index": 1
+        }
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ben",
+      "job": "Guard",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c02",
+        "type": "PARITY",
+        "parity": "ODD",
+        "region": {
+          "kind": "ROW",
+          "index": 1
+        }
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Cara",
+      "job": "Farmer",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "id": "c03",
+        "type": "DIFFERENT",
+        "a": "A1",
+        "b": "C1"
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Dev",
+      "job": "Pilot",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "id": "c04",
+        "type": "EXACTLY",
+        "k": 1,
+        "region": {
+          "kind": "COL",
+          "index": "A"
+        }
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Elle",
+      "job": "Cook",
+      "status": "INNOCENT",
+      "revealed": true,
+      "clue": {
+        "id": "c05",
+        "type": "EXACTLY",
+        "k": 0,
+        "region": {
+          "kind": "COL",
+          "index": "B"
+        }
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Finn",
+      "job": "Doctor",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "id": "c06",
+        "type": "EXACTLY",
+        "k": 2,
+        "region": {
+          "kind": "COL",
+          "index": "C"
+        }
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Gwen",
+      "job": "Painter",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c07",
+        "type": "AT_LEAST",
+        "k": 1,
+        "region": {
+          "kind": "ROW",
+          "index": 2
+        }
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Hugo",
+      "job": "Builder",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c08",
+        "type": "COMPARE",
+        "region_a": {
+          "kind": "ROW",
+          "index": 1
+        },
+        "region_b": {
+          "kind": "ROW",
+          "index": 3
+        },
+        "op": "MORE"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Isla",
+      "job": "Singer",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c09",
+        "type": "SAME",
+        "a": "A2",
+        "b": "C2"
+      }
+    }
+  ]
+}

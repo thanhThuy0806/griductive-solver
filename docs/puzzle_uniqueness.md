@@ -82,8 +82,8 @@ evaluator. Đối chiếu DPLL trên các ca xác định trước bao phủ sá
 Test CLI bao phủ tìm file mặc định, không có file, lỗi từng file, đáp án sai và
 hai witness. Fixture 4×4/5×5 với ít ô chưa mở chỉ kiểm tra xử lý kích thước.
 
-Kiểm thử toàn bộ: **322 passed, 97 subtests passed, 1 skipped**. Skip duy nhất
-là readiness của task 26 do thiếu bộ bảy màn chính thức.
+Kết quả lịch sử ngày 13/11/2026: **322 passed, 97 subtests passed, 1 skipped**.
+Skip khi đó là readiness của task 26; xem cập nhật bộ dữ liệu bên dưới.
 
 ```powershell
 python -m pytest tests/ unit_tests/dpll.py unit_tests/dpll_stats.py -q -rs
@@ -95,9 +95,11 @@ Nếu thư mục tạm mặc định của pytest bị lỗi quyền, thêm
 `--basetemp=.pytest_cache/bruteforce-tmp`. Nếu chưa có `python` trên PATH, dùng
 `C:\Users\TuanKiet\.local\bin\python3.12.exe`.
 
-**Công cụ và mẫu hiện có đã kiểm chứng; bộ bảy màn chưa được nghiệm thu.**
-[Task 26](puzzle_dataset.md) vẫn thiếu màn chính thức và evaluator cho clue mới.
-Giữ Draft PR dựa trên nhánh task 26. Khi có dữ liệu/hỗ trợ, chạy CLI đầy đủ trên
-3 màn 3×3, 3 màn 4×4 và 1 màn 5×5, đối chiếu DPLL và đáp án rồi ghi kết quả.
-Chỉ hoàn tất mục tiêu "mỗi puzzle có đúng một nghiệm" khi đủ bảy màn đều đạt,
-đã review và merge; không coi test readiness bị skip là đã nghiệm thu.
+**Cập nhật 23/11/2026:** [task 26](puzzle_dataset.md) có đủ bộ 3/3/1 và manifest
+nguồn. Sau khi đối chiếu đề bài, bộ test dùng một bản phỏng theo tutorial và sáu
+màn tự biên soạn từ cơ chế suy luận chính thức; không yêu cầu bảy bản xuất gốc.
+PARITY/COMPARE của Duy đã được tích hợp vào nhánh dataset cùng DPLL mới của Phong.
+Test nhanh đối chiếu brute force với DPLL cho mọi màn 3x3/4x4, và không còn skip
+readiness. Bàn 5x5 vẫn kiểm tra đầy đủ bằng CLI riêng, không đưa vòng duyệt lớn
+vào test nhanh. Kết quả của lần chạy đầy đủ được ghi trong tài liệu task 26.
+Nghiệm thu của nhóm vẫn cần review và merge, tách khỏi trạng thái test xanh.

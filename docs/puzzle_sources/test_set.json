@@ -1,0 +1,99 @@
+{
+  "reviewed_on": "2026-11-23",
+  "purpose": "Fixed seven-case comparison set for task 26; p3x3_01.json is a separate regression fixture.",
+  "provenance": "One simplified tutorial adaptation and six authored fixtures inspired by official deduction patterns; none is presented as an unchanged official export.",
+  "cases": [
+    {
+      "path": "puzzles/3x3/p3x3_02.json",
+      "title": "Tutorial: zero column and remaining-count budget",
+      "origin": "adapted",
+      "sources": [
+        "https://knotwise.games/games/griductive/how-to-play"
+      ],
+      "min_joint_steps": 1,
+      "construction": {
+        "method": "manual adaptation"
+      }
+    },
+    {
+      "path": "puzzles/3x3/p3x3_03.json",
+      "title": "Overlapping budgets and binary exclusion",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 2,
+      "construction": {
+        "method": "manual composition"
+      }
+    },
+    {
+      "path": "puzzles/3x3/p3x3_04.json",
+      "title": "Parity and strict regional comparison",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 3,
+      "construction": {
+        "method": "manual composition"
+      }
+    },
+    {
+      "path": "puzzles/4x4/p4x4_01.json",
+      "title": "Column budgets and neighborhood counts",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 2,
+      "construction": {
+        "method": "seeded candidate search, reviewed after validation",
+        "seed": 260401,
+        "selected_attempt": 36
+      }
+    },
+    {
+      "path": "puzzles/4x4/p4x4_02.json",
+      "title": "Intersecting neighborhoods",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 7,
+      "construction": {
+        "method": "seeded candidate search, reviewed after validation",
+        "seed": 260402,
+        "selected_attempt": 49
+      }
+    },
+    {
+      "path": "puzzles/4x4/p4x4_03.json",
+      "title": "Parity, comparison and delayed clues",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 3,
+      "construction": {
+        "method": "seeded candidate search, reviewed after validation",
+        "seed": 260403,
+        "selected_attempt": 23
+      }
+    },
+    {
+      "path": "puzzles/5x5/p5x5_01.json",
+      "title": "Mixed deductions on a 25-cell board",
+      "origin": "authored",
+      "sources": [
+        "https://knotwise.games/games/griductive/strategy"
+      ],
+      "min_joint_steps": 5,
+      "construction": {
+        "method": "seeded candidate search, reviewed after validation",
+        "seed": 260501,
+        "selected_attempt": 23
+      }
+    }
+  ]
+}
