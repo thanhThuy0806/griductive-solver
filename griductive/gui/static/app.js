@@ -3,6 +3,16 @@ let puzzleNames = {};
 let selectedClueCell = null;
 let pendingHint = null;
 let autoTimer = null;
+let feedbackTimer = null;
+
+// Verdict modal target
+let activeVerdictCell = null;
+
+// Timer & pause state
+let elapsedSeconds = 0;
+let gameTimerInterval = null;
+let isPaused = false;
+let winShownForRun = false;
 
 const $ = (id) => document.getElementById(id);
 
@@ -15,14 +25,27 @@ async function api(url, method = "GET", body = null) {
   return data;
 }
 
-function showFeedback(text, type = "info", showApplyBtn = false) {
+function showFeedback(text, type = "info", showApplyBtn = false, autoHideMs = 0) {
+  if (feedbackTimer) {
+    clearTimeout(feedbackTimer);
+    feedbackTimer = null;
+  }
   const banner = $("feedback-banner");
   banner.className = `feedback ${type}`;
   $("feedback-text").textContent = text;
   $("btn-apply-hint").classList.toggle("hidden", !showApplyBtn);
+  if (autoHideMs > 0) {
+    feedbackTimer = setTimeout(() => {
+      hideFeedback();
+    }, autoHideMs);
+  }
 }
 
 function hideFeedback() {
+  if (feedbackTimer) {
+    clearTimeout(feedbackTimer);
+    feedbackTimer = null;
+  }
   $("feedback-banner").classList.add("hidden");
   $("btn-apply-hint").classList.add("hidden");
 }
@@ -36,6 +59,103 @@ function stopAutoSolve() {
   btn.textContent = "Auto Solve";
   btn.classList.remove("btn-danger");
   btn.classList.add("btn-plum");
+}
+
+// ------------------------------------------------------------------ Timer & Overlays
+function formatTime(totalSeconds) {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function updateTimerDisplay() {
+  const formatted = formatTime(elapsedSeconds);
+  $("timer-display").textContent = formatted;
+  $("pause-time-text").textContent = formatted;
+}
+
+function stopGameTimer() {
+  if (gameTimerInterval) {
+    clearInterval(gameTimerInterval);
+    gameTimerInterval = null;
+  }
+}
+
+function startGameTimer() {
+  stopGameTimer();
+  gameTimerInterval = setInterval(() => {
+    if (!isPaused && state && !state.is_solved) {
+      elapsedSeconds += 1;
+      updateTimerDisplay();
+    }
+  }, 1000);
+}
+
+function resetGameTimer() {
+  elapsedSeconds = 0;
+  isPaused = false;
+  winShownForRun = false;
+  $("app-shell").classList.remove("blurred");
+  $("pause-modal").classList.add("hidden");
+  $("win-modal").classList.add("hidden");
+  closeVerdictModal();
+  updateTimerDisplay();
+  startGameTimer();
+}
+
+function pauseGame() {
+  if (!state || state.is_solved || isPaused) return;
+  stopAutoSolve();
+  closeVerdictModal();
+  isPaused = true;
+  updateTimerDisplay();
+  $("app-shell").classList.add("blurred");
+  $("pause-modal").classList.remove("hidden");
+}
+
+function resumeGame() {
+  if (!isPaused) return;
+  isPaused = false;
+  $("app-shell").classList.remove("blurred");
+  $("pause-modal").classList.add("hidden");
+}
+
+function showWinModal() {
+  if (winShownForRun) return;
+  winShownForRun = true;
+  stopGameTimer();
+  stopAutoSolve();
+  closeVerdictModal();
+  $("win-level-text").textContent =
+    puzzleNames[state.puzzle_id] || state.puzzle_id;
+  $("win-time-value").textContent = formatTime(elapsedSeconds);
+  $("win-modal").classList.remove("hidden");
+}
+
+function closeWinModal() {
+  $("win-modal").classList.add("hidden");
+}
+
+function openVerdictModal(ch) {
+  if (isPaused || !state || state.is_solved) return;
+  activeVerdictCell = ch.cell;
+  const avatarUrl = `https://api.dicebear.com/9.x/big-smile/svg?seed=${encodeURIComponent(ch.name)}&backgroundColor=transparent`;
+  $("verdict-modal-cell").textContent = ch.cell;
+  const avatarEl = $("verdict-modal-avatar");
+  avatarEl.style.display = "";
+  avatarEl.src = avatarUrl;
+  avatarEl.alt = ch.name;
+  avatarEl.onerror = () => {
+    avatarEl.style.display = "none";
+  };
+  $("verdict-modal-title").textContent = ch.name;
+  $("verdict-modal-job").textContent = ch.job;
+  $("verdict-modal").classList.remove("hidden");
+}
+
+function closeVerdictModal() {
+  activeVerdictCell = null;
+  $("verdict-modal").classList.add("hidden");
 }
 
 // ------------------------------------------------------------------ Puzzles
@@ -94,6 +214,7 @@ async function selectPuzzle(puzzleId) {
     el.classList.toggle("active", el.dataset.id === puzzleId);
   });
 
+  resetGameTimer();
   renderAll();
 }
 
@@ -101,27 +222,25 @@ async function selectPuzzle(puzzleId) {
 async function submitVerdict(cell, verdict) {
   stopAutoSolve();
   pendingHint = null;
+  closeVerdictModal();
 
   const res = await api("/api/verdict", "POST", { cell, verdict });
   state = res.state;
 
   if (res.result === "ACCEPTED") {
-    selectedClueCell = cell;
-    if (state.is_solved) {
-      showFeedback(
-        "Hoàn thành! Tất cả nhân vật đã được suy luận chính xác.",
-        "success",
-        false,
-      );
-    } else {
-      showFeedback(`Chính xác! ${cell} là ${verdict}.`, "success", false);
-    }
+    // Do NOT auto-highlight referenced clues; only highlight when user clicks a card.
+    selectedClueCell = null;
+    hideFeedback();
     renderAll();
+    if (state.is_solved) {
+      showWinModal();
+    }
   } else if (res.result === "NOT_PROVABLE") {
     showFeedback(
       `NOT_PROVABLE — Chưa đủ dữ kiện công khai để chứng minh ${cell} là ${verdict}.`,
       "warn",
       false,
+      3000,
     );
     shakeCard(cell);
   } else if (res.result === "CONTRADICTED") {
@@ -129,10 +248,11 @@ async function submitVerdict(cell, verdict) {
       `CONTRADICTED — Phán đoán ${cell} là ${verdict} mâu thuẫn với các manh mối hiện có!`,
       "error",
       false,
+      3000,
     );
     shakeCard(cell);
   } else {
-    showFeedback(`${res.result}: ${res.message}`, "warn", false);
+    showFeedback(`${res.result}: ${res.message}`, "warn", false, 3000);
   }
 }
 
@@ -165,14 +285,16 @@ async function runSingleStep() {
   const res = await api("/api/step", "POST");
   state = res.state;
   pendingHint = null;
+  selectedClueCell = null;
   renderAll();
 
   if (res.outcome === "SOLVED") {
     showFeedback(
-      "Auto Solve hoàn thành — Đã giải xong màn chơi!",
+      `Auto Solve hoàn thành trong ${formatTime(elapsedSeconds)} — Đã giải xong màn chơi!`,
       "success",
       false,
     );
+    showWinModal();
   } else if (res.outcome === "STUCK") {
     showFeedback(
       "Agent dừng lại: STUCK (không có ô nào suy luận bắt buộc được).",
@@ -202,6 +324,10 @@ async function toggleAutoSolve() {
   btn.classList.add("btn-danger");
 
   const tick = async () => {
+    if (isPaused) {
+      stopAutoSolve();
+      return;
+    }
     const outcome = await runSingleStep();
     if (outcome === "RUNNING") {
       autoTimer = setTimeout(tick, 450);
@@ -223,6 +349,7 @@ function renderAll() {
 
   const disabled = state.is_solved;
   $("btn-restart").disabled = false;
+  $("btn-pause").disabled = disabled;
   $("btn-hint").disabled = disabled;
   $("btn-step").disabled = disabled;
   $("btn-auto").disabled = disabled;
@@ -284,6 +411,9 @@ function renderBoard() {
           renderBoard();
           renderClues();
         };
+      } else {
+        card.classList.add("unrevealed");
+        card.onclick = () => openVerdictModal(ch);
       }
 
       if (selectedClueCell === cellId) card.classList.add("selected-clue");
@@ -299,14 +429,16 @@ function renderBoard() {
         card.classList.add("hinted");
       }
 
-      const statusText = ch.revealed ? ch.status : "UNKNOWN";
       const avatarUrl = `https://api.dicebear.com/9.x/big-smile/svg?seed=${encodeURIComponent(ch.name)}&backgroundColor=transparent`;
+      const statusBadgeHtml = ch.revealed
+        ? `<span class="status-pill">${ch.status}</span>`
+        : "";
 
       card.innerHTML = `
         <div>
           <div class="card-top">
             <span class="card-cell">${ch.cell}</span>
-            <span class="status-pill">${statusText}</span>
+            ${statusBadgeHtml}
           </div>
           <div class="card-profile">
             <img class="card-avatar" src="${avatarUrl}" alt="${ch.name}"
@@ -324,29 +456,6 @@ function renderBoard() {
         clueDiv.className = "card-clue";
         clueDiv.textContent = ch.clue || "(Không có manh mối)";
         card.appendChild(clueDiv);
-      } else {
-        const actions = document.createElement("div");
-        actions.className = "card-actions";
-
-        const btnInn = document.createElement("button");
-        btnInn.className = "act-btn act-innocent";
-        btnInn.textContent = "Innocent";
-        btnInn.onclick = (e) => {
-          e.stopPropagation();
-          submitVerdict(cellId, "INNOCENT");
-        };
-
-        const btnCrim = document.createElement("button");
-        btnCrim.className = "act-btn act-criminal";
-        btnCrim.textContent = "Criminal";
-        btnCrim.onclick = (e) => {
-          e.stopPropagation();
-          submitVerdict(cellId, "CRIMINAL");
-        };
-
-        actions.appendChild(btnInn);
-        actions.appendChild(btnCrim);
-        card.appendChild(actions);
       }
 
       grid.appendChild(card);
@@ -394,15 +503,20 @@ function renderTrace() {
   }
 }
 
-// ------------------------------------------------------------------ Wiring
-$("btn-restart").onclick = async () => {
+async function restartCurrentPuzzle() {
   stopAutoSolve();
   selectedClueCell = null;
   pendingHint = null;
   hideFeedback();
   state = await api("/api/restart", "POST");
+  resetGameTimer();
   renderAll();
-};
+}
+
+// ------------------------------------------------------------------ Wiring
+$("btn-restart").onclick = restartCurrentPuzzle;
+$("btn-pause").onclick = pauseGame;
+$("btn-resume").onclick = resumeGame;
 
 $("btn-hint").onclick = requestHint;
 $("btn-step").onclick = () => {
@@ -416,6 +530,36 @@ $("btn-apply-hint").onclick = () => {
     submitVerdict(pendingHint.cell, pendingHint.verdict);
   }
 };
+
+// Verdict modal controls
+$("btn-modal-innocent").onclick = () => {
+  if (activeVerdictCell) submitVerdict(activeVerdictCell, "INNOCENT");
+};
+$("btn-modal-criminal").onclick = () => {
+  if (activeVerdictCell) submitVerdict(activeVerdictCell, "CRIMINAL");
+};
+$("btn-modal-cancel").onclick = closeVerdictModal;
+$("verdict-modal").onclick = (e) => {
+  if (e.target === $("verdict-modal")) closeVerdictModal();
+};
+
+// Win modal controls
+$("btn-win-restart").onclick = restartCurrentPuzzle;
+$("btn-win-close").onclick = closeWinModal;
+$("win-modal").onclick = (e) => {
+  if (e.target === $("win-modal")) closeWinModal();
+};
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!$("verdict-modal").classList.contains("hidden")) {
+    closeVerdictModal();
+  } else if (!$("win-modal").classList.contains("hidden")) {
+    closeWinModal();
+  } else if (isPaused) {
+    resumeGame();
+  }
+});
 
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.onclick = () => {

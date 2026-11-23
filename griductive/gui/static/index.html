@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <div id="app-shell" class="app-shell">
       <!-- Left Sidebar: Puzzle List -->
       <aside class="sidebar">
         <div class="brand">
@@ -43,6 +43,19 @@
                 >Chọn màn chơi</span
               >
               <span id="progress-badge" class="pill-badge">0 / 0</span>
+              <div class="timer-group">
+                <span id="timer-display" class="timer-badge" aria-live="off"
+                  >00:00</span
+                >
+                <button
+                  id="btn-pause"
+                  class="btn btn-sm btn-soft"
+                  title="Tạm dừng"
+                  disabled
+                >
+                  Tạm dừng
+                </button>
+              </div>
             </div>
           </div>
 
@@ -83,9 +96,9 @@
 
         <div id="tab-clues" class="tab-content active">
           <div class="panel-hint">
-            Bấm <strong>Innocent</strong> hoặc <strong>Criminal</strong> trên
-            thẻ chưa lật để tự giải tay. Nhấn vào thẻ đã lật hoặc manh mối để tô
-            sáng các ô liên quan.
+            Nhấn vào <strong>nhân vật chưa lật</strong> để chọn
+            <strong>Innocent</strong> hoặc <strong>Criminal</strong>. Nhấn vào
+            thẻ đã lật hoặc manh mối để tô sáng các ô liên quan.
           </div>
           <div id="clue-list" class="clue-list"></div>
         </div>
@@ -94,6 +107,76 @@
           <div id="trace-list" class="trace-list"></div>
         </div>
       </aside>
+    </div>
+
+    <!-- Verdict Selection Modal -->
+    <div
+      id="verdict-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="verdict-modal-title"
+    >
+      <div class="modal-card">
+        <div class="modal-cell-tag" id="verdict-modal-cell">A1</div>
+        <img id="verdict-modal-avatar" class="modal-avatar" src="" alt="" />
+        <h2 id="verdict-modal-title" class="modal-title">Name</h2>
+        <p id="verdict-modal-job" class="modal-subtitle">Job</p>
+        <p class="modal-prompt">Chọn phán đoán cho nhân vật này:</p>
+        <div class="modal-actions-verdict">
+          <button id="btn-modal-innocent" class="btn btn-modal-innocent">
+            Innocent
+          </button>
+          <button id="btn-modal-criminal" class="btn btn-modal-criminal">
+            Criminal
+          </button>
+        </div>
+        <button id="btn-modal-cancel" class="btn btn-soft modal-cancel-btn">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Pause Overlay Modal -->
+    <div
+      id="pause-modal"
+      class="modal-backdrop modal-pause hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pause-modal-title"
+    >
+      <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">⏸</div>
+        <h2 id="pause-modal-title" class="modal-title">Đang tạm dừng</h2>
+        <p class="modal-subtitle">
+          Thời gian hiện tại: <strong id="pause-time-text">00:00</strong>
+        </p>
+        <button id="btn-resume" class="btn btn-plum modal-primary-btn">
+          Chơi tiếp
+        </button>
+      </div>
+    </div>
+
+    <!-- Win Overlay Modal -->
+    <div
+      id="win-modal"
+      class="modal-backdrop hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="win-modal-title"
+    >
+      <div class="modal-card modal-win">
+        <h2 id="win-modal-title" class="modal-title">Chúc mừng! Bạn đã thắng!</h2>
+        <p id="win-level-text" class="modal-subtitle">Màn chơi</p>
+        <div class="win-time-box">
+          <span class="win-time-label">Thời gian hoàn thành</span>
+          <span id="win-time-value" class="win-time-value">00:00</span>
+        </div>
+        <div class="modal-actions-verdict">
+          <button id="btn-win-restart" class="btn btn-plum">Chơi lại</button>
+          <button id="btn-win-close" class="btn btn-soft">Xem bàn cờ</button>
+        </div>
+      </div>
     </div>
 
     <script src="/static/app.js"></script>
