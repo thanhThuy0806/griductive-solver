@@ -1,0 +1,4 @@
+config,size,grid,total_runs,solved,timeout,stuck,inconsistent,error,solve_rate_pct,avg_primary_vars,avg_aux_vars,avg_clauses,avg_sat_calls,avg_decisions,avg_propagations,avg_backtracks,avg_steps,avg_runtime_ms,max_runtime_ms,avg_sat_runtime_ms
+dpll_full,3,3x3,12,12,0,0,0,0,100.0,9.0,0.0,101.0,57.5,16.5,331.5,1.5,8.0,8.21,14.77,2.94
+dpll_full,4,4x4,12,12,0,0,0,0,100.0,16.0,0.0,174.8,186.0,73.2,1767.5,4.0,15.0,37.14,63.55,20.08
+dpll_full,5,5x5,6,6,0,0,0,0,100.0,25.0,0.0,262.5,445.5,510.5,5866.0,1.0,24.0,83.96,114.73,51.26

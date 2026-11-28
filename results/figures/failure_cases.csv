@@ -1,0 +1,1 @@
+puzzle,puzzle_id,size,config,trial,status,primary_vars,aux_vars,clauses,sat_calls,decisions,propagations,backtracks,steps,runtime_ms,error
