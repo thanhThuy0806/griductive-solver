@@ -30,6 +30,23 @@ class ClueType(str, Enum):
     EXACTLY = "EXACTLY"
     AT_LEAST = "AT_LEAST"
     AT_MOST = "AT_MOST"
+    PARITY = "PARITY"
+    COMPARE = "COMPARE"
+
+
+class Parity(str, Enum):
+    """Parity constraint for PARITY clues."""
+
+    EVEN = "EVEN"
+    ODD = "ODD"
+
+
+class CompareOp(str, Enum):
+    """Comparison operators for COMPARE clues."""
+
+    MORE = "MORE"
+    EQUAL = "EQUAL"
+    LESS = "LESS"
 
 
 class RegionKind(str, Enum):

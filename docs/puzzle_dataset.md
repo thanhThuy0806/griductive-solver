@@ -1,135 +1,138 @@
-# Bộ puzzle kiểm thử — bản nháp
+# Task 26 - Bộ puzzle kiểm thử 3x3, 4x4, 5x5
 
-Kiểm tra nguồn ngày 13/11/2026. Mục tiêu: **3 màn 3×3, 3 màn 4×4, 1 màn 5×5**
-từ Griductive chính thức, giữ nguyên logic và giải được từ thông tin công khai.
-Hiện **0/7 màn được nhập**, không đánh dấu task Done. Mẫu FACT `p3x3_01.json`
-được giữ làm regression, không tính vào bộ bảy màn. Không tạo màn thay thế.
+Cập nhật 23/11/2026: đã có **7/7 màn** theo phân công nhóm: 3 màn 3x3,
+3 màn 4x4 và 1 màn stress 5x5. Mẫu FACT cũ `p3x3_01.json` được giữ nguyên
+làm regression riêng, không tính vào bộ bảy màn.
 
-## Nền triển khai
+**Nguồn gốc:** một bản phỏng theo tutorial chính thức và sáu màn tự biên soạn
+dựa trên các cơ chế suy luận trong hướng dẫn chính thức. Không gọi những JSON
+này là bản xuất nguyên vẹn từ game. Các màn lớn được chọn qua tìm kiếm ứng viên
+có seed, rồi kiểm chứng và xem lại từng clue; không tuyên bố tất cả được viết tay.
 
-Nhánh `feat/d-puzzle-test-set` dựa trên `feat/d-game-engine-verdict` (`826a8fd`).
-Đã đối chiếu remote: Engine/schema của Kiệt, core/encoder/evaluator của Duy,
-entailment của Thúy và DPLL của Phong đã có trong nền này. Không lấy thêm GUI.
-PR nền Engine: <https://github.com/thanhThuy0806/griductive-solver/pull/2>.
+## Đối chiếu đề bài
 
-## Nguồn đã kiểm tra
+Đề `AI - Project 2.pdf`, mục 2.1, 3.2 và 4.5, yêu cầu bàn vuông, tên theo alphabet,
+sáu clue cơ bản, ít nhất hai extension và thực nghiệm trên nhiều màn 3x3/4x4.
+5x5 là stress case tùy chọn trong đề và được đưa vào phân công nhóm này.
+Đề không bắt buộc nhập màn từ game chính thức. Điều kiện nguồn chính thức trong
+bản nháp ngày 13/11 là giả định cũ, được thay bằng yêu cầu tham khảo và ghi nguồn.
 
-- [Tác giả giới thiệu game](https://www.reddit.com/r/playmygame/comments/1r5fdze/griductive_a_detectivestyle_logic_puzzle_game/)
-  từng nêu hỗ trợ 3×3, 4×4 và 5×5. Đây không phải bằng chứng rằng dữ liệu cả ba
-  kích thước vẫn có sẵn trong phiên bản hiện tại.
-- [Tài liệu ứng dụng Reddit](https://developers.reddit.com/apps/griductive)
-  mô tả endpoint JSON cũ `data.griductive.com`; host này hiện trả trang HTML.
-- [Tutorial chính thức](https://knotwise.games/games/griductive/tutorial): tìm được
-  dữ liệu đầy đủ trong [client công khai](https://knotwise.games/_next/static/chunks/14bm8mnorovtd.js),
-  export `tutorialPuzzle`, ID `griductive-tutorial`, ngày `tutorial`, bàn 3×3.
-  Lưu wire JSON trong [puzzle_sources/griductive_tutorial.json](puzzle_sources/griductive_tutorial.json).
-  Đây là ứng viên chờ hỗ trợ, **không phải JSON của loader dự án**.
-  SHA-256 của JSON UTF-8 sau chuẩn hóa xuống dòng LF:
-  `0BC8ED5254FCFBA4C5A54EF03F7A88AB69FFCC69C026890F38AE6A0D73AE40C3`.
-- Client game hiện dùng CDN `data.knotwise.games/griductive/daily/YYYY/MM/DD.json`.
-  Đã đọc bảy màn trong cửa sổ miễn phí, không truy cập màn bị khóa. Tất cả là 4 cột
-  × 5 hàng (20 ô); không cắt hàng, thêm ô hoặc đổi sang bàn vuông.
+Chỉ dùng clue có trong code chung: FACT, SAME, DIFFERENT, EXACTLY, AT_LEAST,
+AT_MOST, PARITY và COMPARE. Không cần chờ compound/connectivity để hoàn tất
+bộ test này. Mỗi màn có một thẻ mở ban đầu, mọi clue đều đúng, có đúng một nghiệm
+trên biến ô và mở hết được bằng chứng minh từ dữ kiện công khai.
 
-| ID/ngày màn | JSON chính thức | Kích thước | Kết quả |
-| --- | --- | --- | --- |
-| griductive-2026-11-06 | [06/11](https://data.knotwise.games/griductive/daily/2026/11/06.json) | 4×5 | Không đúng kích thước; có clue ghép, liên thông, so sánh, chẵn/lẻ, flavor |
-| griductive-2026-11-07 | [07/11](https://data.knotwise.games/griductive/daily/2026/11/07.json) | 4×5 | Không đúng kích thước; có clue duy nhất theo số hàng xóm, giao vùng, flavor |
-| griductive-2026-11-08 | [08/11](https://data.knotwise.games/griductive/daily/2026/11/08.json) | 4×5 | Không đúng kích thước; có liên thông, hướng, tổng vùng, flavor |
-| griductive-2026-11-09 | [09/11](https://data.knotwise.games/griductive/daily/2026/11/09.json) | 4×5 | Không đúng kích thước; có cực trị, giao vùng, chẵn/lẻ, flavor |
-| griductive-2026-11-10 | [10/11](https://data.knotwise.games/griductive/daily/2026/11/10.json) | 4×5 | Không đúng kích thước; có clue ghép, giao vùng, flavor |
-| griductive-2026-11-11 | [11/11](https://data.knotwise.games/griductive/daily/2026/11/11.json) | 4×5 | Không đúng kích thước; có liên thông, so sánh, chẵn/lẻ, flavor |
-| griductive-2026-11-12 | [12/11](https://data.knotwise.games/griductive/daily/2026/11/12.json) | 4×5 | Không đúng kích thước; có clue ghép, duy nhất theo vùng, chẵn/lẻ, flavor |
+## Tài liệu tham khảo và cách sử dụng
 
-`flavor` là lời thoại không mang ràng buộc; schema hiện bắt buộc mỗi thẻ có một
-clue trong sáu loại cơ bản. Không thay lời thoại bằng FACT hay tự thêm ràng buộc.
-Không lưu bảy màn 4×5 trong thư mục puzzle vì đã loại ngay ở tiêu chí kích thước.
+| Nguồn | Phần được tham khảo |
+| --- | --- |
+| [How to Play Griductive](https://knotwise.games/games/griductive/how-to-play) | Tutorial 3x3, đếm chính xác, tám hàng xóm và lộ trình mở thẻ |
+| [Griductive Strategy](https://knotwise.games/games/griductive/strategy) | Giao vùng, sử dụng hết ngân sách số lượng, kết hợp parity/count và phối hợp các clue được mở ở những thời điểm khác nhau |
+| [Tutorial tương tác](https://knotwise.games/games/griductive/tutorial) | Bàn, tên/nghề, đáp án và thẻ mở ban đầu của trường hợp tham khảo |
 
-## Ánh xạ tutorial và phần còn thiếu
+File [griductive_tutorial.json](puzzle_sources/griductive_tutorial.json) giữ dữ liệu
+wire gốc đã lưu trước đây, chỉ dùng để đối chiếu, không phải input của loader.
+Hướng dẫn chính thức hiện mô tả daily 4 cột x 5 hàng; không cắt các daily đó
+thành bàn vuông hoặc nhận là màn gốc 4x4/5x5. Không dùng dữ liệu từ gói trả phí
+hoặc sao chép puzzle từ repository bài tập của nhóm khác.
 
-Chỉ số `person`/`initialReveals` của nguồn tính từ 0 theo row-major; row/col tính
-từ 1. Thẻ mở ban đầu là Hugo ở B3, INNOCENT. Đáp án CRIMINAL: B1, B2, A3.
-Giữ nguyên tên, nghề, thứ tự và trạng thái trong file wire; không suy diễn clue mới.
+### Những thay đổi trong bản phỏng theo tutorial
 
-| Thẻ | Atom gốc | Ánh xạ/điều kiện |
-| --- | --- | --- |
-| A1 Ada | all_units_have_at_least_n_traits | Chờ clue ghép: AT_LEAST 1 cho từng hàng, vẫn trên cùng thẻ |
-| B1 Ben | both_traits_are_neighbors_in_unit | Chờ đếm và liên thông của hai tội phạm cột B; không thay bằng SAME |
-| C1 Cara | number_of_traits_in_unit | EXACTLY 1, ROW 1 |
-| A2 Dev | number_of_traits_in_unit | EXACTLY 1, ROW 2 |
-| B2 Elle | is_one_of_n_traits_in_unit | Chờ ghép FACT B2 CRIMINAL và EXACTLY 2, COL B |
-| C2 Finn | more_traits_in_unit_than_unit | Chờ so sánh số tội phạm COL A > COL C |
-| A3 Gwen | number_of_traits | EXACTLY 3 trên CELLS gồm cả 9 ô |
-| B3 Hugo | number_of_traits_in_unit | EXACTLY 0, COL C |
-| C3 Isla | number_of_traits_in_unit | EXACTLY 1, NEIGHBORS của C3 |
+`p3x3_02.json` giữ bàn 3x3, tên/nghề, đáp án và Hugo ở B3 mở ban đầu:
 
-Chưa xuất puzzle của loader: các ánh xạ khả dụng ở trên không đủ để giữ nguyên
-toàn bộ màn. Không chia clue ghép sang thẻ khác, không bỏ clue dù có thể dư thừa
-đối với một lộ trình giải. Nhóm tên/nghề chỉ được đổi thành CELLS khi đúng tập ô.
+| Thẻ | Điều chỉnh so với tutorial |
+| --- | --- |
+| A1 Ada | Thu hẹp điều kiện mỗi hàng có ít nhất một tội phạm thành AT_LEAST 1 ở hàng 3 |
+| B1 Ben | Giữ EXACTLY 2 ở cột B; bỏ phần liên thông chưa được hỗ trợ |
+| B2 Elle | Giữ EXACTLY 2 ở cột B; bỏ FACT về chính Elle, vốn đã được chứng minh khi mở thẻ |
+| Sáu thẻ còn lại | Chuyển trực tiếp sang EXACTLY hoặc COMPARE của dự án |
 
-## Bảng bàn giao và điều kiện tiếp tục
+Đây là thay đổi nội dung puzzle có chủ ý, không khẳng định tương đương đầy đủ
+với bản gốc. Đáp án và khả năng giải của phiên bản mới được kiểm tra riêng.
 
-Tên file dưới đây là **dự kiến**, chưa phải file tồn tại hay màn được nghiệm thu.
+## Bộ so sánh cố định
 
-| Vị trí | Nguồn ứng viên | Trạng thái | Phụ trách/đầu vào cần có |
-| --- | --- | --- | --- |
-| p3x3_02.json | griductive-tutorial | Chờ hỗ trợ clue | Duy: core/encoder/evaluator cho clue ghép, liên thông, so sánh; Kiệt: loader/hợp đồng tương ứng |
-| p3x3_03.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 3×3 đầy đủ, khác cách suy luận |
-| p3x3_04.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 3×3 đầy đủ, khác hai màn trên |
-| p4x4_01.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 4×4 đầy đủ |
-| p4x4_02.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 4×4 với chuỗi suy luận khác |
-| p4x4_03.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 4×4 với chuỗi suy luận khác |
-| p5x5_01.json | Chưa có | Chờ nguồn | Kiệt: màn chính thức 5×5 để kiểm tra luồng mở thẻ/CNF |
+[test_set.json](puzzle_sources/test_set.json) liệt kê chính xác bảy file, nguồn,
+kiểu biên soạn và mức tối thiểu của `joint_steps`. Dùng danh sách này cho các
+so sánh thực nghiệm; không đưa mẫu FACT vào cùng tập mà không ghi rõ.
+Các tham số search trong manifest là thông tin biên soạn, không dùng khi chơi;
+JSON đã chốt là đầu vào tái lập, không sinh puzzle ngẫu nhiên lúc chạy test.
 
-Nguồn đầy đủ cần có bàn, tên/nghề, đáp án, clue trên từng thẻ và thẻ mở ban đầu;
-chỉ ảnh một phần hay lời giải walkthrough chưa đủ để nhập. Nếu màn mới có clue
-ngoài sáu loại hiện tại, ghi rõ atom/thẻ và chờ hỗ trợ tương ứng trước khi xuất.
-Khả năng hỗ trợ bàn chữ nhật không giải quyết yêu cầu bộ dữ liệu bàn vuông.
+| File | Trọng tâm | Thẻ mở | Lượt mở | Joint steps | Biến chính/phụ | Clauses đầy đủ |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `p3x3_02.json` | Tutorial phỏng theo: cột rỗng, hàng xóm, số lượng còn lại | B3 | 8 | 1 | 9/0 | 229 |
+| `p3x3_03.json` | Hai ngân sách giao nhau và loại trừ nhị nguyên | A3 | 8 | 2 | 9/0 | 67 |
+| `p3x3_04.json` | Parity kết hợp so sánh vùng nghiêm ngặt | B2 | 8 | 3 | 9/0 | 66 |
+| `p4x4_01.json` | Ngân sách cột và đếm hàng xóm | A4 | 15 | 2 | 16/0 | 248 |
+| `p4x4_02.json` | Giao các vùng hàng xóm, nhiều bước phối hợp | A4 | 15 | 7 | 16/0 | 194 |
+| `p4x4_03.json` | Clue mới mở phối hợp parity và compare | A4 | 15 | 3 | 16/0 | 137 |
+| `p5x5_01.json` | Stress 25 ô, trộn đếm, parity, compare và quan hệ | A5 | 24 | 5 | 25/0 | 375 |
 
-Auto Solve/uniqueness của Thúy và runner thực nghiệm của Phong chưa cần cho
-kiểm chứng này. Không sửa thay các module đó. Khi có nguồn/commit hỗ trợ mới,
-đối chiếu API, lấy đúng phần phụ thuộc, nhập màn và chạy lại kiểm chứng; không
-thiết lập theo dõi nền. Chỉ cập nhật hợp đồng khi thực sự triển khai API mới.
+`joint_steps` là số bước trong lộ trình row-major mà **không clue đã mở đơn lẻ
+nào đủ chứng minh nước đi**, ngay cả khi được dùng tất cả trạng thái công khai
+trước bước đó. Các clue phải phối hợp. Đây là thước đo cấu trúc suy luận, không
+phải điểm độ khó được người chơi đánh giá. Không đồng nhất kích thước lớn hơn
+với khó hơn: màn 4x4 thứ hai có nhiều joint steps hơn màn stress 5x5.
 
-## Kiểm chứng và nghiệm thu
+Mẫu FACT có 0 joint steps. Test giữ các ngưỡng của bảy màn để tránh vô tình
+thay chúng bằng chuỗi FACT hoặc đưa quá nhiều đáp án vào trạng thái ban đầu.
+Các seed/ứng viên được chọn cho bốn màn lớn: 260401/36, 260402/49,
+260403/23 và 260501/23. Giao vùng được lưu bằng CELLS với đúng tập ô.
 
-`tests/test_puzzle_dataset.py` tự tìm mọi file JSON chuẩn dưới `puzzles/`:
+## Phụ thuộc đã tích hợp
 
-1. Loader kiểm tra cấu trúc, kích thước thư mục và số ô.
-2. Evaluator trực tiếp kiểm tra mọi clue, kể cả clue chưa mở, với đáp án riêng.
-3. Encoder tạo CNF của toàn bộ clue cùng unit clauses của **thẻ mở ban đầu**.
-   Thay giá trị đáp án vào CNF để xác nhận đáp án thỏa mãn; sau đó thêm một clause
-   loại đáp án trên biến ô và yêu cầu UNSAT. Không khóa các đáp án ẩn trong KB;
-   biến phụ vẫn tự do, nên chỉ kiểm tra nghiệm duy nhất trên các biến ô.
-4. Engine cung cấp snapshot GUI công khai và AgentKnowledge riêng cho classifier;
-   chọn ô chưa mở đầu tiên theo row-major
-   có classification bắt buộc, submit rồi lấy snapshot mới. Không dùng đáp án
-   riêng để chọn nước đi. Nếu không có nước đi, báo tên file, bước và ô còn úp.
+Nhánh `feat/d-puzzle-test-set` kế thừa Engine, AgentKnowledge và công cụ kiểm
+tra brute force đã có. Lấy thêm các commit sau, giữ tác giả và ghi nguồn cherry-pick:
 
-Test lộ trình ghi `reveal_steps`, `primary_vars`, `aux_vars`, `clauses` bằng pytest
-properties (có trong JUnit XML). Mẫu hiện có: **8 lượt mở, 9 biến chính, 0 biến phụ,
-10 clauses** ở CNF đầy đủ tính cả trạng thái ban đầu. Với 5×5 tương lai phải mở hết
-25 ô theo cấu hình nguồn và ghi cùng số liệu; chưa đặt ngưỡng runtime theo máy.
-Các ca âm chỉ dựng trong bộ nhớ để kiểm tra phát hiện clue sai, nhiều nghiệm và
-bị kẹt; không tính chúng vào bộ bảy màn.
+| Commit nguồn | Nội dung |
+| --- | --- |
+| `09c2092` của Duy | PARITY/COMPARE, core/loader/projector và test; thống nhất Region.of với alias of_cell |
+| `52ffda8`, `1d02e7c` của Phong | Bộ test DPLL, pure literal, MOM và timeout |
+
+Không thay LogicAgent, GUI, main.py hoặc runner thực nghiệm của thành viên khác.
+Lộ trình kiểm thử gọi EntailmentChecker qua cầu nối Engine thật; chưa phải phép
+đo Auto Solve/GUI hay benchmark so sánh cấu hình solver.
+
+## Kiểm chứng
+
+`tests/test_puzzle_dataset.py` kiểm tra mọi JSON puzzle, gồm cả mẫu regression:
+
+1. Loader kiểm tra schema, kích thước, tọa độ và thứ tự tên.
+2. Evaluator độc lập kiểm tra từng clue với đáp án lưu.
+3. Encoder tạo CNF của mọi clue cùng unit của **thẻ mở ban đầu**. Thay đáp án
+   vào CNF rồi kiểm tra phần dư; thêm clause loại đáp án trên biến chính để
+   chứng minh không có nghiệm thứ hai. Không khóa các status ẩn trong CNF.
+4. Engine cung cấp AgentKnowledge. Chỉ phân loại ô chưa mở từ dữ kiện công khai,
+   chọn ô bắt buộc đầu tiên theo row-major, submit rồi dựng lại dữ kiện.
+5. Brute force độc lập đối chiếu mọi màn 3x3/4x4. Màn 5x5 chạy riêng bằng CLI.
+6. Kiểm tra bộ 3/3/1, độ bao phủ tám loại clue/bốn region và ngưỡng joint steps.
+   Không coi timeout là bằng chứng UNSAT/duy nhất.
+
+Chạy từ gốc repository (Python 3.10+):
 
 ```powershell
 python -m pytest tests/ unit_tests/dpll.py unit_tests/dpll_stats.py -q -rs
-python -m pytest tests/test_puzzle_dataset.py -q -rs --junitxml=results/raw/puzzle_dataset.xml
+python -m pytest tests/test_puzzle_dataset.py -q -o junit_family=legacy --junitxml=results/raw/puzzle_dataset.xml
+python -m griductive.engine.puzzle_uniqueness puzzles/5x5/p5x5_01.json
 ```
 
-Nếu `python` chưa có trên PATH, dùng Python 3.12 đã cài tại
-`C:\Users\TuanKiet\.local\bin\python3.12.exe`.
+Nếu thư mục tạm mặc định bị lỗi quyền, tạo `.pytest_cache` rồi thêm
+`--basetemp=.pytest_cache/task26`. Nếu chưa có `python` trên PATH của máy Kiệt,
+dùng `C:\Users\TuanKiet\.local\bin\python3.12.exe`.
 
-Kết quả bản nháp: **299 passed, 97 subtests passed, 1 skipped**. Readiness bị skip
-có chủ đích vì 0/7 màn chính thức; test xanh không có nghĩa bộ dữ liệu đã đủ.
-Không đổi skip thành pass hoặc xóa điều kiện để nghiệm thu sớm.
+Kết quả 23/11/2026: dataset **44 passed**; toàn bộ **497 passed,
+97 subtests passed**, không còn readiness skip. CLI brute force 5x5 đã duyệt đủ
+**16.777.216** cách gán: **UNIQUE**, nghiệm khớp đáp án lưu, exit code 0.
+Runtime riêng của vòng kiểm chứng này là **118.921,387 ms** (khoảng 118,9 giây);
+đây là kết quả chạy thực, độc lập với DPLL, không suy ra từ test SAT.
 
-Giữ Draft PR dựa trên nhánh Engine. Chuyển base về `main` khi nền Engine được
-merge; chỉ ready khi đủ 3/3/1 màn chính thức, giữ logic gốc, cả bốn lớp kiểm chứng
-đều đạt và không còn readiness skip/phụ thuộc bắt buộc. Task Done sau review và
-merge. Chưa benchmark 5×5 vì chưa có nguồn màn phù hợp.
+[CSV kiểm chứng](../results/raw/20261123_puzzle_dataset.csv) lưu số biến/clause,
+SAT calls, decisions, propagations, backtracks, số lượt mở, runtime, joint steps
+và thứ tự mở. Chỉ đếm SAT trong luồng chơi công khai, gồm cả kiểm tra verdict
+lần nữa của Engine; loại các truy vấn phụ để đo joint steps/uniqueness.
+`clauses` là CNF đầy đủ, không phải số clause ban đầu. Runtime là một lượt đo
+trên Windows với Python 3.12.13 và DPLL từ `1d02e7c` (pure literal/MOM bật,
+không đặt timeout). Không đặt ngưỡng runtime cứng hoặc suy ra độ khó của con người.
 
-Task 27 bổ sung [công cụ brute force độc lập](puzzle_uniqueness.md) để đối chiếu
-kiểm tra DPLL. Test nhanh tự kiểm tra thêm các màn 3×3/4×4; ca 5×5 đầy đủ chạy
-riêng bằng `python -m griductive.engine.puzzle_uniqueness`. Trạng thái chờ nguồn
-của bộ bảy màn ở trên vẫn còn hiệu lực.
+Bộ dữ liệu đủ điều kiện kỹ thuật để review task 26. Trạng thái Done của nhóm
+vẫn cần reviewer kiểm tra và merge; không tự thay đổi bảng phân công.

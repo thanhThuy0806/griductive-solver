@@ -7,7 +7,8 @@ import shutil
 import sys
 from pathlib import Path
 
-INCLUDE = ["main.py", "README.md", "requirements.txt", "griductive", "puzzles", "tests", "experiments"]
+INCLUDE = ["main.py", "README.md", "requirements.txt", "griductive", "puzzles",
+           "tests", "unit_tests", "experiments", "docs", "results"]
 
 
 def main() -> None:

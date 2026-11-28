@@ -1,0 +1,8 @@
+puzzles/3x3/p3x3_01.json | 3x3 | UNIQUE | assignments_checked=256 | runtime_ms=0.267
+puzzles/3x3/p3x3_02.json | 3x3 | UNIQUE | assignments_checked=256 | runtime_ms=2.653
+puzzles/3x3/p3x3_03.json | 3x3 | UNIQUE | assignments_checked=256 | runtime_ms=1.681
+puzzles/3x3/p3x3_04.json | 3x3 | UNIQUE | assignments_checked=256 | runtime_ms=2.324
+puzzles/4x4/p4x4_01.json | 4x4 | UNIQUE | assignments_checked=32768 | runtime_ms=648.662
+puzzles/4x4/p4x4_02.json | 4x4 | UNIQUE | assignments_checked=32768 | runtime_ms=323.030
+puzzles/4x4/p4x4_03.json | 4x4 | UNIQUE | assignments_checked=32768 | runtime_ms=345.677
+puzzles/5x5/p5x5_01.json | 5x5 | UNIQUE | assignments_checked=16777216 | runtime_ms=108764.109

@@ -1,0 +1,385 @@
+{
+  "size": 5,
+  "characters": [
+    {
+      "cell": "A1",
+      "name": "Ada",
+      "job": "Teacher",
+      "status": "INNOCENT",
+      "revealed": true,
+      "clue": {
+        "id": "c01",
+        "type": "EXACTLY",
+        "k": 0,
+        "region": {
+          "kind": "ROW",
+          "index": 1
+        }
+      }
+    },
+    {
+      "cell": "B1",
+      "name": "Ben",
+      "job": "Guard",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "DIFFERENT",
+        "a": "C1",
+        "b": "C4",
+        "id": "c02"
+      }
+    },
+    {
+      "cell": "C1",
+      "name": "Cara",
+      "job": "Farmer",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "DIFFERENT",
+        "a": "E1",
+        "b": "C5",
+        "id": "c03"
+      }
+    },
+    {
+      "cell": "D1",
+      "name": "Dev",
+      "job": "Pilot",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["A1", "A3", "B4"]
+        },
+        "k": 1,
+        "id": "c04"
+      }
+    },
+    {
+      "cell": "E1",
+      "name": "Elle",
+      "job": "Cook",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "PARITY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["A1", "B4", "E1"]
+        },
+        "parity": "EVEN",
+        "id": "c05"
+      }
+    },
+    {
+      "cell": "A2",
+      "name": "Finn",
+      "job": "Doctor",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "SAME",
+        "a": "D4",
+        "b": "A5",
+        "id": "c06"
+      }
+    },
+    {
+      "cell": "B2",
+      "name": "Gwen",
+      "job": "Painter",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c07",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "ROW",
+          "index": 3
+        },
+        "k": 4
+      }
+    },
+    {
+      "cell": "C2",
+      "name": "Hugo",
+      "job": "Builder",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["C5", "D5", "E4"]
+        },
+        "k": 1,
+        "id": "c08"
+      }
+    },
+    {
+      "cell": "D2",
+      "name": "Isla",
+      "job": "Singer",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "PARITY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["B5", "C4", "D3"]
+        },
+        "parity": "EVEN",
+        "id": "c09"
+      }
+    },
+    {
+      "cell": "E2",
+      "name": "Jude",
+      "job": "Librarian",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "DIFFERENT",
+        "a": "B1",
+        "b": "A2",
+        "id": "c10"
+      }
+    },
+    {
+      "cell": "A3",
+      "name": "Kira",
+      "job": "Engineer",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "PARITY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["B3", "C3", "C5"]
+        },
+        "parity": "ODD",
+        "id": "c11"
+      }
+    },
+    {
+      "cell": "B3",
+      "name": "Leon",
+      "job": "Baker",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["A3", "A4", "D1"]
+        },
+        "k": 2,
+        "id": "c12"
+      }
+    },
+    {
+      "cell": "C3",
+      "name": "Maya",
+      "job": "Nurse",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "SAME",
+        "a": "D1",
+        "b": "D4",
+        "id": "c13"
+      }
+    },
+    {
+      "cell": "D3",
+      "name": "Nico",
+      "job": "Clerk",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "SAME",
+        "a": "D3",
+        "b": "E4",
+        "id": "c14"
+      }
+    },
+    {
+      "cell": "E3",
+      "name": "Orla",
+      "job": "Artist",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "SAME",
+        "a": "A2",
+        "b": "E5",
+        "id": "c15"
+      }
+    },
+    {
+      "cell": "A4",
+      "name": "Paul",
+      "job": "Detective",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "COMPARE",
+        "region_a": {
+          "kind": "CELLS",
+          "cells": ["C1", "D3"]
+        },
+        "region_b": {
+          "kind": "CELLS",
+          "cells": ["C1", "E1"]
+        },
+        "op": "EQUAL",
+        "id": "c16"
+      }
+    },
+    {
+      "cell": "B4",
+      "name": "Quinn",
+      "job": "Writer",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "SAME",
+        "a": "C4",
+        "b": "B3",
+        "id": "c17"
+      }
+    },
+    {
+      "cell": "C4",
+      "name": "Rhea",
+      "job": "Judge",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "PARITY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["A1", "B3", "E3"]
+        },
+        "parity": "EVEN",
+        "id": "c18"
+      }
+    },
+    {
+      "cell": "D4",
+      "name": "Seth",
+      "job": "Driver",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["B3", "B4", "C2"]
+        },
+        "k": 1,
+        "id": "c19"
+      }
+    },
+    {
+      "cell": "E4",
+      "name": "Tara",
+      "job": "Scientist",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c20",
+        "type": "AT_MOST",
+        "region": {
+          "kind": "ROW",
+          "index": 3
+        },
+        "k": 4
+      }
+    },
+    {
+      "cell": "A5",
+      "name": "Uma",
+      "job": "Musician",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["B2", "D2", "E3"]
+        },
+        "k": 2,
+        "id": "c21"
+      }
+    },
+    {
+      "cell": "B5",
+      "name": "Vera",
+      "job": "Tailor",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "id": "c22",
+        "type": "AT_LEAST",
+        "region": {
+          "kind": "COL",
+          "index": "B"
+        },
+        "k": 2
+      }
+    },
+    {
+      "cell": "C5",
+      "name": "Will",
+      "job": "Carpenter",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "EXACTLY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["A1", "A3", "E2"]
+        },
+        "k": 1,
+        "id": "c23"
+      }
+    },
+    {
+      "cell": "D5",
+      "name": "Xena",
+      "job": "Reporter",
+      "status": "INNOCENT",
+      "revealed": false,
+      "clue": {
+        "id": "c24",
+        "type": "EXACTLY",
+        "region": {
+          "kind": "NEIGHBORS",
+          "of": "D5"
+        },
+        "k": 3
+      }
+    },
+    {
+      "cell": "E5",
+      "name": "Yuri",
+      "job": "Gardener",
+      "status": "CRIMINAL",
+      "revealed": false,
+      "clue": {
+        "type": "PARITY",
+        "region": {
+          "kind": "CELLS",
+          "cells": ["C4", "D2", "E3"]
+        },
+        "parity": "ODD",
+        "id": "c25"
+      }
+    }
+  ]
+}
